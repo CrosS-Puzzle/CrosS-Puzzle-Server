@@ -41,9 +41,6 @@ jobs:
 
             
     - name: make application.yml
-      if: |
-          contains(github.ref, 'main') ||
-          contains(github.ref, 'dev')
       run: |
           mkdir ./src/main/resources # resources 폴더 생성
           cd ./src/main/resources # resources 폴더로 이동
@@ -70,7 +67,6 @@ jobs:
 
     # docker build & push to production
     - name: Docker build & push to prod
-      if: contains(github.ref, 'dev')
       uses: docker/build-push-action@v4
       with:
         file: ./Dockerfile
