@@ -43,7 +43,7 @@ jobs:
     - name: make application.yml
       if: |
           contains(github.ref, 'main') ||
-          contains(github.ref, 'develop')
+          contains(github.ref, 'dev')
       run: |
           mkdir ./src/main/resources # resources 폴더 생성
           cd ./src/main/resources # resources 폴더로 이동
