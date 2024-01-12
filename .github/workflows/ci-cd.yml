@@ -31,10 +31,7 @@ jobs:
     - name: make application.yml
       run: |
           mkdir ./src/main/resources # resources 폴더 생성
-          cd ./src/main/resources # resources 폴더로 이동
-          touch ./application.yml # application.yml 생성
-          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
-      shell: bash
+          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
 
     - run: |
         cat ./src/main/resources/application.yml 
