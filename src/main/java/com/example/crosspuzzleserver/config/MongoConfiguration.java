@@ -14,7 +14,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 public class MongoConfiguration {
     @Bean
     public MappingMongoConverter converterSetting(MongoDatabaseFactory factory, MongoMappingContext ctx,
-                                       BeanFactory beanFactory) {
+                                                  BeanFactory beanFactory) {
         DbRefResolver resolver = new DefaultDbRefResolver(factory);
         MappingMongoConverter converter = new MappingMongoConverter(resolver, ctx);
         converter.setTypeMapper(new DefaultMongoTypeMapper(null));  //_class 필드 제거하기

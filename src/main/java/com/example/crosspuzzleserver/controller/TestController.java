@@ -7,10 +7,15 @@ import com.example.crosspuzzleserver.domain.CrossWords;
 import com.example.crosspuzzleserver.repository.AnswersInfoRepository;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
 import com.example.crosspuzzleserver.repository.TestRepo;
+import com.example.crosspuzzleserver.util.error.Error;
+import com.example.crosspuzzleserver.util.exception.BadRequestException;
+import com.example.crosspuzzleserver.util.response.ApiResponse;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,14 +35,15 @@ public class TestController {
     }
 
     @GetMapping("/testdb")
-    public String testdb() {
+    public ResponseEntity<ApiResponse> testdb() {
         CrossPuzzle crossPuzzle = testRepo.findCrossPuzzleById("65956246b8817d0461363432");
-        return crossPuzzle.getName();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(crossPuzzle));
     }
 
     @PostMapping("/postdb")
     public void postdb() {
-        int[] arr = new int[]{1,2};
+        int[] arr = new int[]{1, 2};
         AnswersInfo answersInfo = AnswersInfo.builder()
                 .coords(arr)
                 .wordId("123")
@@ -58,5 +64,13 @@ public class TestController {
 
 
     }
+
+    @GetMapping("/error")
+    public ResponseEntity<ApiResponse> testError() {
+
+        throw new BadRequestException(Error.BAD_REQUEST.getMessage());
+
+    }
+
 
 }
