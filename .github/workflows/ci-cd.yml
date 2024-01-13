@@ -10,7 +10,8 @@ name: Java CI with Gradle
 on:
   push:
     branches: [ "dev" ]
-
+  pull_request:
+    branches: [ "dev" ]
 permissions:
   contents: read
 
@@ -25,26 +26,15 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '17'
-        distribution: 'temurin'
-      
-    - name: Gradle Caching
-      uses: actions/cache@v3
-      with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+        distribution: 'corretto'
 
-            
     - name: make application.yml
       run: |
           mkdir ./src/main/resources # resources 폴더 생성
-          cd ./src/main/resources # resources 폴더로 이동
-          touch ./application.yml # application.yml 생성
-          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml # github actions에서 설정한 값을 application.yml 파일에 쓰기
-      shell: bash
+          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+
+    - run: |
+        cat ./src/main/resources/application.yml 
 
     - name: Build with Gradle
       run: ./gradlew build -x test
@@ -65,13 +55,9 @@ jobs:
 
     # docker build & push to production
     - name: Docker build & push to prod
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        platforms: linux/amd64
-        tags: seongha9/docker-cross-puzzle:latest
+      run: |
+        docker build --platform linux/amd64 -t seongha9/docker-cross-puzzle .
+        docker push seongha9/docker-cross-puzzle
 
   # deploy
   depoly :
