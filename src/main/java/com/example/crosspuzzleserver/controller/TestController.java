@@ -35,14 +35,15 @@ public class TestController {
     }
 
     @GetMapping("/testdb")
-    public String testdb() {
+    public ResponseEntity<ApiResponse> testdb() {
         CrossPuzzle crossPuzzle = testRepo.findCrossPuzzleById("65956246b8817d0461363432");
-        return crossPuzzle.getName();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(crossPuzzle));
     }
 
     @PostMapping("/postdb")
     public void postdb() {
-        int[] arr = new int[]{1,2};
+        int[] arr = new int[]{1, 2};
         AnswersInfo answersInfo = AnswersInfo.builder()
                 .coords(arr)
                 .wordId("123")
@@ -65,9 +66,9 @@ public class TestController {
     }
 
     @GetMapping("/error")
-    public ResponseEntity<ApiResponse> testError(){
+    public ResponseEntity<ApiResponse> testError() {
 
-        throw new BadRequestException(HttpStatus.BAD_REQUEST, Error.BAD_REQUEST.getMessage());
+        throw new BadRequestException(Error.BAD_REQUEST.getMessage());
 
     }
 

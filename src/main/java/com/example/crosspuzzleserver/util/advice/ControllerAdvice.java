@@ -17,5 +17,4 @@ public class ControllerAdvice {
                 .body(ApiResponse.fail(baseException.getStatusCode(), baseException.getMessage()));
     }
 
-
 }

@@ -20,7 +20,7 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    public static ApiResponse fail(int errorCode,String message) {
+    public static ApiResponse fail(int errorCode, String message) {
         return ApiResponse.builder()
                 .code(errorCode)
                 .message(message)
