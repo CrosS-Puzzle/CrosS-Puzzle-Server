@@ -17,7 +17,12 @@ public class CrossWords {
 
     private String cateId;
 
-    @DBRef(db="AnswersInfo")
+    private int size;
+    
+    @DBRef(db = "QuestionInfos")
+    private QuestionInfos questionInfos;
+
+    @DBRef(db = "AnswersInfo")
     private List<AnswersInfo> answersInfo;
 
 }

@@ -10,7 +10,7 @@ public enum Error {
 
     //400
     BAD_REQUEST("잘못된 요청입니다."),
-
+    ILLEGAL_SORT_REQUEST("잘못된 정렬 요청입니다."),
 
     //404
     NOT_FOUND_CATEGORY("존재하지 않는 카테고리 입니다."),

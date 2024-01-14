@@ -4,6 +4,7 @@ package com.example.crosspuzzleserver.controller;
 import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.CrossPuzzle;
 import com.example.crosspuzzleserver.domain.CrossWords;
+import com.example.crosspuzzleserver.domain.Words;
 import com.example.crosspuzzleserver.repository.AnswersInfoRepository;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
 import com.example.crosspuzzleserver.repository.TestRepo;
@@ -46,7 +47,6 @@ public class TestController {
         int[] arr = new int[]{1, 2};
         AnswersInfo answersInfo = AnswersInfo.builder()
                 .coords(arr)
-                .wordId("123")
                 .direction("col")
                 .build();
 
