@@ -20,7 +20,7 @@ public class AnswersInfo {
 
     int[] coords;
 
-    String direction;
+    int direction;  //0이면 가로방향, 1이면 세로방향
 
     @DBRef(db = "Words")
     Words words;

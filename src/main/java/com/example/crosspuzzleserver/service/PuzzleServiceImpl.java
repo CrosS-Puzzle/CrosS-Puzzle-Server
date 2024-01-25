@@ -8,23 +8,22 @@ import com.example.crosspuzzleserver.repository.CrossWordsRepository;
 import com.example.crosspuzzleserver.service.dto.AnswerInfoDto;
 import com.example.crosspuzzleserver.service.dto.PuzzleDto;
 import com.example.crosspuzzleserver.service.dto.WordDto;
+import com.example.crosspuzzleserver.service.spi.PuzzleService;
 import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.exception.BadRequestException;
 import com.example.crosspuzzleserver.util.exception.NotFoundException;
-import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class PuzzleService {
+public class PuzzleServiceImpl implements PuzzleService {
 
     private final CrossWordsRepository crossWordsRepository;
     private final CategoryRepository categoryRepository;
@@ -43,7 +42,8 @@ public class PuzzleService {
                 .id(crossWords.getId())
                 .views(crossWords.getQuestionInfos().getViewCount())
                 .wins(crossWords.getQuestionInfos().getWinCount())
-                .size(crossWords.getSize())
+                .rowSize(crossWords.getRowSize())
+                .colSize(crossWords.getColSize())
                 .answerInfoDtoList(crossWords.getAnswersInfo().stream().map(
                         answersInfo -> getAnswerInfoDto(answersInfo, includeValue)
                 ).collect(Collectors.toList()))

@@ -17,8 +17,9 @@ public class CrossWords {
 
     private String cateId;
 
-    private int size;
-    
+    private int rowSize;
+    private int colSize;
+
     @DBRef(db = "QuestionInfos")
     private QuestionInfos questionInfos;
 

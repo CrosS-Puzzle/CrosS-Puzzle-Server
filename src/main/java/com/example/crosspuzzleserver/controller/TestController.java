@@ -8,6 +8,7 @@ import com.example.crosspuzzleserver.domain.Words;
 import com.example.crosspuzzleserver.repository.AnswersInfoRepository;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
 import com.example.crosspuzzleserver.repository.TestRepo;
+import com.example.crosspuzzleserver.service.WordPuzzle;
 import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.exception.BadRequestException;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
@@ -47,7 +48,7 @@ public class TestController {
         int[] arr = new int[]{1, 2};
         AnswersInfo answersInfo = AnswersInfo.builder()
                 .coords(arr)
-                .direction("col")
+                .direction(1)
                 .build();
 
         answersInfoRepository.save(answersInfo);
@@ -70,6 +71,14 @@ public class TestController {
 
         throw new BadRequestException(Error.BAD_REQUEST.getMessage());
 
+    }
+
+    @GetMapping("/testGen")
+    public String testGen(){
+
+        WordPuzzle.generateCrossWord();
+
+        return "success";
     }
 
 

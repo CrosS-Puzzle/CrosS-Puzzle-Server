@@ -11,7 +11,8 @@ public class PuzzleDto {
     private String id;
     private int views;
     private int wins;
-    private int size;
+    private int rowSize;
+    private int colSize;
     private List<AnswerInfoDto> answerInfoDtoList;
 
 }
