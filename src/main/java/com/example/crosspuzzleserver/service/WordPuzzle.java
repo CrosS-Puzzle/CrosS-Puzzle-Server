@@ -18,6 +18,7 @@ public class WordPuzzle {
 
 //    private static CrossWordsRepository crossWordsRepository;
 
+
     public static void generateCrossWord() {
         String[] words = {"기차", "차돌박이", "돌잡이", "이쑤시개", "포세이돈", "개선문", "선물포장"};
 
@@ -79,59 +80,72 @@ public class WordPuzzle {
         Words words;
     }
 
-    static boolean isValid(char[][] board, int overlapIndex, int x, int y, Words word, int direction) {
-        int boardLength = board.length;
+    static boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
+                           int direction) {
 
-        if (direction == 0) { // Horizontal
-            if (y - overlapIndex < 0 || y + word.getValue().length() - overlapIndex > boardLength) {
-                return false;
-            }
+        int[][] insertDirection = {{0, 1}, {1, 0}};
 
-            if (board[x][y - overlapIndex - 1] != 'ㅡ' && board[x][y - overlapIndex - 1] != 'x') {
-                return false;
-            }
+        int boardSize = board.length;
+        int wordLength = word.getValue().length();
 
-            if (board[x][y + word.getValue().length() - overlapIndex] != 'ㅡ'
-                    && board[x][y + word.getValue().length() - overlapIndex] != 'x') {
-                return false;
-            }
-        } else { // Vertical
-            if (x - overlapIndex < 0 || x + word.getValue().length() - overlapIndex > boardLength) {
-                return false;
-            }
+        int startX = overLapPosX - overlapIndex * insertDirection[direction][0];
+        int startY = overLapPosY - overlapIndex * insertDirection[direction][1];
 
-            if (board[x - overlapIndex - 1][y] != 'ㅡ' && board[x - overlapIndex - 1][y] != 'x') {
-                return false;
-            }
+        int endX = startX + (wordLength - 1) * insertDirection[direction][0];
+        int endY = startY + (wordLength - 1) * insertDirection[direction][1];
 
-            if (board[x + word.getValue().length() - overlapIndex][y] != 'ㅡ'
-                    && board[x + word.getValue().length() - overlapIndex][y] != 'x') {
+        if (!isWithinRange(boardSize, startX, startY, endX, endY)) {
+            return false;
+        }
+
+        //바로 이전칸
+        int prevX = startX - insertDirection[direction][0];
+        int prevY = startY - insertDirection[direction][1];
+
+        //바로 다음칸
+        int nextX = endX + insertDirection[direction][0];
+        int nextY = endY + insertDirection[direction][1];
+
+        if (prevX >= 0 && prevY >= 0 && nextX < boardSize && nextY < boardSize) {
+            if (isCellOccupied(board, prevX, prevY) || isCellOccupied(board, nextX, nextY)) {
                 return false;
             }
         }
 
-        for (int i = -overlapIndex; i < word.getValue().length() - overlapIndex; i++) {
-            if (direction == 0) { // Horizontal
-                if (board[x][y + i] == 'x') {
-                    return false;
-                }
-
-                if (board[x][y + i] != 'ㅡ' && board[x][y + i] != word.getValue().charAt(i + overlapIndex)) {
-                    return false;
-                }
-            } else { // Vertical
-                if (board[x + i][y] == 'x') {
-                    return false;
-                }
-
-                if (board[x + i][y] != 'ㅡ' && board[x + i][y] != word.getValue().charAt(i + overlapIndex)) {
+        for (int i = 0; i < wordLength; i++) {
+            int x = startX + i * insertDirection[direction][0];
+            int y = startY + i * insertDirection[direction][1];
+            if (isCellBlocked(board, x, y)) {
+                return false;
+            }
+            if (!isCellEmpty(board, x, y)) {
+                if (board[x][y] != word.getValue().charAt(i)) {
                     return false;
                 }
             }
         }
-
         return true;
     }
+
+    static boolean isWithinRange(int boardSize, int startX, int startY, int endX, int endY) {
+        if (startX < 0 || startY < 0 || endX >= boardSize || endY >= boardSize) {
+            return false;
+        }
+        return true;
+    }
+
+    static boolean isCellEmpty(char[][] board, int x, int y) {
+        return board[x][y] == 'ㅡ';
+    }
+
+    static boolean isCellBlocked(char[][] board, int x, int y) {
+        return board[x][y] == 'x';
+    }
+
+    static boolean isCellOccupied(char[][] board, int x, int y) {
+        return board[x][y] != 'x' && board[x][y] != 'ㅡ';
+    }
+
 
     static List<WordInfo> findOverlaps(Words previousWord, int previousDirection, int startX, int startY,
                                        List<Words> unusedWords) {
