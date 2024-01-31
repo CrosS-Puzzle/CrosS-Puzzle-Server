@@ -65,6 +65,28 @@ public class WordPuzzle {
         }
     }
 
+    //가로일때 0,1 체크, 세로일때 1,0체크
+    static final int[][] insertDirection = {{0, 1}, {1, 0}};
+
+    static List<CheckList> checkLists = new ArrayList<>();
+
+    static {
+        checkLists.add(new CheckList(new int[]{-1, -1}, List.of(new int[]{-1, 0}, new int[]{0, -1})));
+        checkLists.add(new CheckList(new int[]{-1, 1}, List.of(new int[]{-1, 0}, new int[]{0, 1})));
+        checkLists.add(new CheckList(new int[]{1, -1}, List.of(new int[]{1, 0}, new int[]{0, -1})));
+        checkLists.add(new CheckList(new int[]{1, 1}, List.of(new int[]{1, 0}, new int[]{0, 1})));
+    }
+
+    static class CheckList {
+        int[] check;
+        List<int[]> block;
+
+        public CheckList(int[] check, List<int[]> block) {
+            this.check = check;
+            this.block = block;
+        }
+    }
+
     @Builder
     static class PuzzleResult {
         List<AnswersInfoDAO> answersInfoList;
@@ -82,8 +104,6 @@ public class WordPuzzle {
 
     static boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
                            int direction) {
-
-        int[][] insertDirection = {{0, 1}, {1, 0}};
 
         int boardSize = board.length;
         int wordLength = word.getValue().length();
@@ -296,82 +316,52 @@ public class WordPuzzle {
                     ((wordInfo.direction == 0) ? wordInfo.y - wordInfo.indexOfOverlap : wordInfo.y) + " " +
                     wordInfo.direction);
 
-            for (int i = -wordInfo.indexOfOverlap; i < wordInfo.word.getValue().length() - wordInfo.indexOfOverlap;
-                 i++) {
-                if (wordInfo.direction == 0) { // Horizontal
-                    newBoard[wordInfo.x][wordInfo.y + i] = wordInfo.word.getValue().charAt(i + wordInfo.indexOfOverlap);
+            //여기부터 수정
+            int x = wordInfo.x;
+            int y = wordInfo.y;
+            int direction = wordInfo.direction;
+            String wordValue = wordInfo.word.getValue();
 
-                    if (newBoard[wordInfo.x - 1][wordInfo.y + i - 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x - 1][wordInfo.y + i - 1] != 'x' &&
-                            newBoard[wordInfo.x - 1][wordInfo.y + i] == 'ㅡ') {
-                        newBoard[wordInfo.x - 1][wordInfo.y + i] = 'x';
+            int startX = x - wordInfo.indexOfOverlap * insertDirection[direction][0];
+            int startY = y - wordInfo.indexOfOverlap * insertDirection[direction][1];
+
+            int endX = startX + (wordValue.length() - 1) * insertDirection[direction][0];
+            int endY = startY + (wordValue.length() - 1) * insertDirection[direction][1];
+
+            int prevX = startX - insertDirection[direction][0];
+            int prevY = startY - insertDirection[direction][1];
+
+            int nextX = endX + insertDirection[direction][0];
+            int nextY = endY + insertDirection[direction][1];
+
+            //블럭처리
+            for (int i = 0; i < wordValue.length(); i++) {
+                int nx = startX + i * insertDirection[direction][0];
+                int ny = startY + i * insertDirection[direction][1];
+
+                board[nx][ny] = wordValue.charAt(i);
+
+                for (CheckList checkList : checkLists) {
+                    int[] check = checkList.check;
+                    List<int[]> block = checkList.block;
+
+                    if (isCellOccupied(board, nx + check[0], ny + check[1])) {
+                        for (int[] b : block) {
+                            if (isCellEmpty(board, nx + b[0], ny + b[1]) &&
+                                    !isCellBlocked(board, nx + b[0], ny + b[1])) {
+                                board[nx + b[0]][ny + b[1]] = 'x';
+                            }
+                        }
                     }
 
-                    if (newBoard[wordInfo.x + 1][wordInfo.y + i - 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x + 1][wordInfo.y + i - 1] != 'x' &&
-                            newBoard[wordInfo.x + 1][wordInfo.y + i] == 'ㅡ') {
-                        newBoard[wordInfo.x + 1][wordInfo.y + i] = 'x';
-                    }
-
-                    if (newBoard[wordInfo.x - 1][wordInfo.y + i + 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x - 1][wordInfo.y + i + 1] != 'x' &&
-                            newBoard[wordInfo.x - 1][wordInfo.y + i] == 'ㅡ') {
-                        newBoard[wordInfo.x - 1][wordInfo.y + i] = 'x';
-                    }
-
-                    if (newBoard[wordInfo.x + 1][wordInfo.y + i + 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x + 1][wordInfo.y + i + 1] != 'x' &&
-                            newBoard[wordInfo.x + 1][wordInfo.y + i] == 'ㅡ') {
-                        newBoard[wordInfo.x + 1][wordInfo.y + i] = 'x';
-                    }
-                } else { // Vertical
-                    newBoard[wordInfo.x + i][wordInfo.y] = wordInfo.word.getValue().charAt(i + wordInfo.indexOfOverlap);
-
-                    if (newBoard[wordInfo.x + i - 1][wordInfo.y - 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x + i - 1][wordInfo.y - 1] != 'x' &&
-                            newBoard[wordInfo.x + i][wordInfo.y - 1] == 'ㅡ') {
-                        newBoard[wordInfo.x + i][wordInfo.y - 1] = 'x';
-                    }
-
-                    if (newBoard[wordInfo.x + i - 1][wordInfo.y + 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x + i - 1][wordInfo.y + 1] != 'x' &&
-                            newBoard[wordInfo.x + i][wordInfo.y + 1] == 'ㅡ') {
-                        newBoard[wordInfo.x + i][wordInfo.y + 1] = 'x';
-                    }
-
-                    if (newBoard[wordInfo.x + i + 1][wordInfo.y - 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x + i + 1][wordInfo.y - 1] != 'x' &&
-                            newBoard[wordInfo.x + i][wordInfo.y - 1] == 'ㅡ') {
-                        newBoard[wordInfo.x + i][wordInfo.y - 1] = 'x';
-                    }
-
-                    if (newBoard[wordInfo.x + i + 1][wordInfo.y + 1] != 'ㅡ' &&
-                            newBoard[wordInfo.x + i + 1][wordInfo.y + 1] != 'x' &&
-                            newBoard[wordInfo.x + i][wordInfo.y + 1] == 'ㅡ') {
-                        newBoard[wordInfo.x + i][wordInfo.y + 1] = 'x';
-                    }
                 }
             }
 
-            if (wordInfo.direction == 0) { // Horizontal
-                if (newBoard[wordInfo.x][wordInfo.y - wordInfo.indexOfOverlap - 1] == 'ㅡ') {
-                    newBoard[wordInfo.x][wordInfo.y - wordInfo.indexOfOverlap - 1] = 'x';
-                }
-
-                if (newBoard[wordInfo.x][wordInfo.y + wordInfo.word.getValue().length() - wordInfo.indexOfOverlap]
-                        == 'ㅡ') {
-                    newBoard[wordInfo.x][wordInfo.y + wordInfo.word.getValue().length()
-                            - wordInfo.indexOfOverlap] = 'x';
-                }
-            } else { // Vertical
-                if (newBoard[wordInfo.x - wordInfo.indexOfOverlap - 1][wordInfo.y] == 'ㅡ') {
-                    newBoard[wordInfo.x - wordInfo.indexOfOverlap - 1][wordInfo.y] = 'x';
-                }
-
-                if (newBoard[wordInfo.x + wordInfo.word.getValue().length() - wordInfo.indexOfOverlap][wordInfo.y]
-                        == 'ㅡ') {
-                    newBoard[wordInfo.x + wordInfo.word.getValue().length()
-                            - wordInfo.indexOfOverlap][wordInfo.y] = 'x';
+            //삽입후 단어 앞뒤막기
+            if (prevX >= 0 && prevY >= 0 && nextX < board.length && nextY < board.length) {
+                if (isCellOccupied(board, prevX, prevY) && isCellOccupied(board, nextX, nextY)) {
+                    board[prevX][prevY] = 'x';
+                    board[nextX][nextY] = 'x';
                 }
             }
 
