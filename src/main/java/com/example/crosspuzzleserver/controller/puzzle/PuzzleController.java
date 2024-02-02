@@ -5,9 +5,11 @@ import com.example.crosspuzzleserver.service.PuzzleServiceImpl;
 import com.example.crosspuzzleserver.service.dto.PuzzleDto;
 import com.example.crosspuzzleserver.service.spi.PuzzleService;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/puzzle")
+@RequestMapping("")
 public class PuzzleController {
 
     private final PuzzleService puzzleService;
-    private final static String DEFAULT_PAGE = "1";
+    private final static String DEFAULT_PAGE = "0";
     private final static String DEFAULT_LIMIT = "12";
     private final static String DEFAULT_SORT = "asc";
 
@@ -40,13 +42,15 @@ public class PuzzleController {
 
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> getPuzzleListByCategoryId(
-            @RequestParam(value = "catId", required = false) String categoryId,
+            @RequestParam(value = "category", required = false, defaultValue = "") List<String> categoryNames,
             @RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) int page,
             @RequestParam(value = "limit", required = false, defaultValue = DEFAULT_LIMIT) int limit,
             @RequestParam(value = "sort", required = false, defaultValue = DEFAULT_SORT) String sort
     ) {
 
-        Page<CrossWords> puzzlePage = puzzleService.getPuzzlesByCategoryId(categoryId, page, limit, sort);
+        System.out.println(categoryNames.size() +"  " + categoryNames.get(0));
+
+        Page<CrossWords> puzzlePage = puzzleService.getPuzzlesByCategoryName(categoryNames, page, limit, sort);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(puzzlePage));

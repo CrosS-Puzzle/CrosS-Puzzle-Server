@@ -5,8 +5,13 @@ import com.example.crosspuzzleserver.domain.CrossWords;
 import com.example.crosspuzzleserver.domain.QuestionInfos;
 import com.example.crosspuzzleserver.domain.Words;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
+import com.example.crosspuzzleserver.repository.WordsRepository;
+import com.example.crosspuzzleserver.util.category.Category;
+import com.example.crosspuzzleserver.util.error.Error;
+import com.example.crosspuzzleserver.util.exception.NotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,43 +21,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class WordPuzzle {
 
-//    private static CrossWordsRepository crossWordsRepository;
+    private final CrossWordsRepository crossWordsRepository;
+    private final WordsRepository wordsRepository;
 
-
-    public static void generateCrossWord() {
-        String[] words = {"기차", "차돌박이", "돌잡이", "이쑤시개", "포세이돈", "개선문", "선물포장"};
-
-        //String 이 아니라 Words 오브젝트를 리스트로 넘겨야함.
-        List<Words> wordsList = new ArrayList<>();
-        for (int i = 0; i < words.length; i++) {
-            wordsList.add(
-                    Words.builder()
-                            .value(words[i])
-                            .build()
-            );
-        }
-
-        String categoryId = "cateId";
-        CrossWords createdCrossWords = createPuzzle(wordsList, categoryId);
-
-        System.out.println(" \n");
-        System.out.println("rowSize = " + createdCrossWords.getRowSize() + '\n');
-        System.out.println("colSize = " + createdCrossWords.getColSize() + '\n');
-        System.out.println("cateId = " + createdCrossWords.getCateId() + '\n');
-        for (int i = 0; i < createdCrossWords.getAnswersInfo().size(); i++) {
-            System.out.println("answerInfos = " + createdCrossWords.getAnswersInfo().get(i).getWords().getValue());
-            System.out.println("x = " + createdCrossWords.getAnswersInfo().get(i).getCoords()[0]);
-            System.out.println("y = " + createdCrossWords.getAnswersInfo().get(i).getCoords()[1]);
-            System.out.println("direction = " + createdCrossWords.getAnswersInfo().get(i).getDirection() + '\n');
-        }
-
-        System.out.println("\n");
-
-        //createPuzzle  에 정답 리스트, 판을 자르기 위한 왼쪽위, 오른쪽 아래 좌표를 반환해야함.
-//        crossWordsRepository.save(createdCrossWords);
-    }
-
-    static class WordInfo {
+    class WordInfo {
         int x, y, direction, indexOfOverlap;
         Words word;
 
@@ -70,14 +42,14 @@ public class WordPuzzle {
 
     static List<CheckList> checkLists = new ArrayList<>();
 
-    static {
+    {
         checkLists.add(new CheckList(new int[]{-1, -1}, List.of(new int[]{-1, 0}, new int[]{0, -1})));
         checkLists.add(new CheckList(new int[]{-1, 1}, List.of(new int[]{-1, 0}, new int[]{0, 1})));
         checkLists.add(new CheckList(new int[]{1, -1}, List.of(new int[]{1, 0}, new int[]{0, -1})));
         checkLists.add(new CheckList(new int[]{1, 1}, List.of(new int[]{1, 0}, new int[]{0, 1})));
     }
 
-    static class CheckList {
+    class CheckList {
         int[] check;
         List<int[]> block;
 
@@ -102,8 +74,51 @@ public class WordPuzzle {
         Words words;
     }
 
-    static boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
-                           int direction) {
+    public void generateCrossWord(List<Category> categoryNameList) {
+//        String[] words = {"기차", "차돌박이", "돌잡이", "이쑤시개", "포세이돈", "개선문", "선물포장"};
+
+        //String 이 아니라 Words 오브젝트를 리스트로 넘겨야함.
+//        List<Words> wordsList = new ArrayList<>();
+//        for (int i = 0; i < words.length; i++) {
+//            wordsList.add(
+//                    Words.builder()
+//                            .value(words[i])
+//                            .build()
+//            );
+//        }
+
+        List<Words> wordsList = new ArrayList<>();
+        for (Category categoryName : categoryNameList) {
+            List<Words> tmpList = wordsRepository.findWordsByCategory(categoryName.getName())
+                    .orElse(new ArrayList<>());
+            wordsList.addAll(tmpList);
+        }
+
+        //카테고리 enum을 string으로 변환
+        CrossWords createdCrossWords = createPuzzle(wordsList,
+                categoryNameList.stream().map(Category::getName).collect(
+                        Collectors.toList()));
+
+        System.out.println(" \n");
+        System.out.println("rowSize = " + createdCrossWords.getRowSize() + '\n');
+        System.out.println("colSize = " + createdCrossWords.getColSize() + '\n');
+        System.out.println("cateId = " + createdCrossWords.getCategories().get(0).toString() + '\n');
+        for (int i = 0; i < createdCrossWords.getAnswersInfo().size(); i++) {
+            System.out.println("answerInfos = " + createdCrossWords.getAnswersInfo().get(i).getWords().getValue());
+            System.out.println("x = " + createdCrossWords.getAnswersInfo().get(i).getCoords()[0]);
+            System.out.println("y = " + createdCrossWords.getAnswersInfo().get(i).getCoords()[1]);
+            System.out.println("direction = " + createdCrossWords.getAnswersInfo().get(i).getDirection() + '\n');
+        }
+
+        System.out.println("\n");
+
+        //createPuzzle  에 정답 리스트, 판을 자르기 위한 왼쪽위, 오른쪽 아래 좌표를 반환해야함.
+        crossWordsRepository.save(createdCrossWords);
+    }
+
+
+    boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
+                    int direction) {
 
         int boardSize = board.length;
         int wordLength = word.getValue().length();
@@ -147,28 +162,28 @@ public class WordPuzzle {
         return true;
     }
 
-    static boolean isWithinRange(int boardSize, int startX, int startY, int endX, int endY) {
+    boolean isWithinRange(int boardSize, int startX, int startY, int endX, int endY) {
         if (startX < 0 || startY < 0 || endX >= boardSize || endY >= boardSize) {
             return false;
         }
         return true;
     }
 
-    static boolean isCellEmpty(char[][] board, int x, int y) {
+    boolean isCellEmpty(char[][] board, int x, int y) {
         return board[x][y] == 'ㅡ';
     }
 
-    static boolean isCellBlocked(char[][] board, int x, int y) {
+    boolean isCellBlocked(char[][] board, int x, int y) {
         return board[x][y] == 'x';
     }
 
-    static boolean isCellOccupied(char[][] board, int x, int y) {
+    boolean isCellOccupied(char[][] board, int x, int y) {
         return board[x][y] != 'x' && board[x][y] != 'ㅡ';
     }
 
 
-    static List<WordInfo> findOverlaps(Words previousWord, int previousDirection, int startX, int startY,
-                                       List<Words> unusedWords) {
+    List<WordInfo> findOverlaps(Words previousWord, int previousDirection, int startX, int startY,
+                                List<Words> unusedWords) {
         List<WordInfo> result = new ArrayList<>();
 
         for (int i = 0; i < previousWord.getValue().length(); i++) {
@@ -193,7 +208,7 @@ public class WordPuzzle {
         return result;
     }
 
-    static CrossWords createPuzzle(List<Words> words, String categroyId) {
+    CrossWords createPuzzle(List<Words> words, List<String> categoryNames) {
         char[][] board = new char[25][25];
         for (int i = 0; i < 25; i++) {
             for (int j = 0; j < 25; j++) {
@@ -248,7 +263,7 @@ public class WordPuzzle {
                 .winCount(0)
                 .build();
         CrossWords crossWords = CrossWords.builder()
-                .cateId(categroyId)
+                .categories(categoryNames)
                 .rowSize(rowSize)
                 .colSize(colSize)
                 .answersInfo(answersInfoList)
@@ -265,8 +280,8 @@ public class WordPuzzle {
         return crossWords;
     }
 
-    static PuzzleResult create(char[][] board, List<Words> usedWords, List<Words> unusedWords,
-                               List<WordInfo> connectionInfo) {
+    PuzzleResult create(char[][] board, List<Words> usedWords, List<Words> unusedWords,
+                        List<WordInfo> connectionInfo) {
         List<WordInfo> newConnectionInfo = new ArrayList<>(connectionInfo);
         char[][] newBoard = board;
         List<AnswersInfoDAO> answersInfoList = new ArrayList<>();

@@ -1,11 +1,13 @@
 package com.example.crosspuzzleserver.domain;
 
+import com.example.crosspuzzleserver.util.category.Category;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 @Document
 @Builder
@@ -15,15 +17,14 @@ public class CrossWords {
     @Id
     private String id;
 
-    private String cateId;
+    private List<String> categories;
 
     private int rowSize;
     private int colSize;
 
-    @DBRef(db = "QuestionInfos")
     private QuestionInfos questionInfos;
 
-    @DBRef(db = "AnswersInfo")
+    @DocumentReference
     private List<AnswersInfo> answersInfo;
 
 }

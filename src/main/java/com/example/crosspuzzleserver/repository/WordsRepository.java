@@ -8,5 +8,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 public interface WordsRepository extends MongoRepository<Words, String> {
 
     Optional<List<Words>> findWordsByCategory(String category);
-
 }

@@ -3,7 +3,7 @@ package com.example.crosspuzzleserver.service;
 import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.CrossWords;
 import com.example.crosspuzzleserver.domain.Words;
-import com.example.crosspuzzleserver.repository.CategoryRepository;
+import com.example.crosspuzzleserver.repository.CrossWordsCustomQuery;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
 import com.example.crosspuzzleserver.service.dto.AnswerInfoDto;
 import com.example.crosspuzzleserver.service.dto.PuzzleDto;
@@ -12,6 +12,7 @@ import com.example.crosspuzzleserver.service.spi.PuzzleService;
 import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.exception.BadRequestException;
 import com.example.crosspuzzleserver.util.exception.NotFoundException;
+import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,14 +27,15 @@ import org.springframework.stereotype.Service;
 public class PuzzleServiceImpl implements PuzzleService {
 
     private final CrossWordsRepository crossWordsRepository;
-    private final CategoryRepository categoryRepository;
+    private final CrossWordsCustomQuery crossWordsCustomQuery;
+
 
     public PuzzleDto getPuzzleById(String puzzleId, String answer) {
         CrossWords crossWords = crossWordsRepository.findById(puzzleId)
                 .orElseThrow(() ->
                         new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
                 );
-
+        System.out.println(crossWords.getAnswersInfo().get(0).getId());
         return crossWordsToPuzzleDto(crossWords, Boolean.parseBoolean(answer));
     }
 
@@ -70,7 +72,7 @@ public class PuzzleServiceImpl implements PuzzleService {
     private WordDto wordsToWordDtoWithValue(Words words) {
         return WordDto.builder()
                 .category(words.getCategory())
-                .id(words.getId())
+                .id(String.valueOf(words.getId()))
                 .value(words.getValue())
                 .description(words.getDescription())
                 .build();
@@ -79,21 +81,20 @@ public class PuzzleServiceImpl implements PuzzleService {
     private WordDto wordsToWordDtoWithOutValue(Words words) {
         return WordDto.builder()
                 .category(words.getCategory())
-                .id(words.getId())
+                .id(String.valueOf(words.getId()))
                 .description(words.getDescription())
                 .build();
     }
 
-    public Page<CrossWords> getPuzzlesByCategoryId(String categoryId, int page, int limit, String sort) {
+
+    @Override
+    public Page<CrossWords> getPuzzlesByCategoryName(List<String> categoryName, int page, int limit, String sort) {
 
         Direction direction = getDirection(sort);
-        PageRequest pageRequest = PageRequest.of(page, limit, direction, "id");
+        PageRequest pageRequest = PageRequest.of(page, limit, direction, "_id");
 
-        if (categoryId != null && categoryRepository.existsById(categoryId)) {
-            return crossWordsRepository.findByCateId(categoryId, pageRequest);
-        } else {
-            return crossWordsRepository.findAll(pageRequest);
-        }
+        return crossWordsCustomQuery.findByCategories(categoryName, pageRequest);
+//        return crossWordsRepository.findByCategoriesContains(categoryName, pageRequest);
     }
 
 
