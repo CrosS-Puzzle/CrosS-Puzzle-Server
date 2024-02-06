@@ -57,7 +57,6 @@ public class PuzzleServiceImpl implements PuzzleService {
         QuestionInfos questionInfos = crossWords.getQuestionInfos();
         questionInfos.addViewCount();
         questionInfoRepository.save(questionInfos);
-        crossWordsRepository.save(crossWords);
     }
 
     private PuzzleDto crossWordsToPuzzleDto(CrossWords crossWords, boolean includeValue) {
@@ -152,7 +151,6 @@ public class PuzzleServiceImpl implements PuzzleService {
         QuestionInfos questionInfos = crossWords.getQuestionInfos();
         questionInfos.addWinCount();
         questionInfoRepository.save(questionInfos);
-        crossWordsRepository.save(crossWords);
         return true;
     }
 

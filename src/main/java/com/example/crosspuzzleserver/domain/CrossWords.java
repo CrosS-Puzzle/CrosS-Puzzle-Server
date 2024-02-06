@@ -23,6 +23,7 @@ public class CrossWords {
     private int rowSize;
     private int colSize;
 
+    @DocumentReference
     private QuestionInfos questionInfos;
 
     @DocumentReference

@@ -16,6 +16,7 @@ public class ApiResponse<T> {
 
     public static ApiResponse success(Object data) {
         return ApiResponse.builder()
+                .code(200)
                 .data(data)
                 .build();
     }
