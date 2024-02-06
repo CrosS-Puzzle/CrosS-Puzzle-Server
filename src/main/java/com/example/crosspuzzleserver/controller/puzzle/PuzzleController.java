@@ -48,7 +48,7 @@ public class PuzzleController {
             @RequestParam(value = "sort", required = false, defaultValue = DEFAULT_SORT) String sort
     ) {
 
-        System.out.println(categoryNames.size() +"  " + categoryNames.get(0));
+        System.out.println(categoryNames.size() + "  " + categoryNames.get(0));
 
         Page<CrossWords> puzzlePage = puzzleService.getPuzzlesByCategoryName(categoryNames, page, limit, sort);
 
