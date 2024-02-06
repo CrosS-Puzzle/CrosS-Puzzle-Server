@@ -1,8 +1,11 @@
 package com.example.crosspuzzleserver.controller.puzzle;
 
+import com.example.crosspuzzleserver.service.dto.CheckWordsDto;
+import com.example.crosspuzzleserver.service.dto.IsAnswerDto;
 import com.example.crosspuzzleserver.service.dto.PuzzleDto;
 import com.example.crosspuzzleserver.service.dto.PuzzleListDto;
 import com.example.crosspuzzleserver.service.spi.PuzzleService;
+import com.example.crosspuzzleserver.service.spi.WordsService;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +26,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PuzzleQueryController {
 
     private final PuzzleService puzzleService;
+    private final WordsService wordsService;
+
     private final static String DEFAULT_PAGE = "0";
     private final static String DEFAULT_LIMIT = "12";
     private final static String DEFAULT_SORT = "asc";
@@ -52,5 +59,21 @@ public class PuzzleQueryController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(puzzlePage));
     }
+
+
+    @PostMapping("/check")
+    public ResponseEntity<ApiResponse> checkWords(
+            @RequestBody CheckWordsDto checkWordsDto) {
+
+        boolean isAns = wordsService.checkWords(checkWordsDto);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        IsAnswerDto.builder()
+                                .success(isAns)
+                                .build()
+                ));
+    }
+
 
 }

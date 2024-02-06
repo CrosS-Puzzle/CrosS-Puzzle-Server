@@ -16,6 +16,7 @@ public enum Error {
     //404
     NOT_FOUND_CATEGORY("존재하지 않는 카테고리 입니다."),
     NOT_FOUND_WORDS_BY_CATEGORY_NAME("카테고리에 해당하는 단어를 찾을 수 없습니다."),
+    NOT_FOUND_WORDS("존재하지 않는 단어 입니다."),
     NOT_FOUND_PUZZLE("존재하지 않는 퍼즐 입니다.");
 
     private final String message;
