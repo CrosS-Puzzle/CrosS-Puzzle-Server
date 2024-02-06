@@ -78,8 +78,6 @@ public class TestController {
                 .build();
         questionInfoRepository.save(questionInfos);
 
-        System.out.println(questionInfos.getId() + "   " + questionInfos.getWinCount());
-
         CrossWords crossWords = CrossWords.builder()
                 .answersInfo(answersInfos)
                 .categories(categories)
@@ -105,17 +103,6 @@ public class TestController {
         wordPuzzle.generateCrossWord(categories);
 
         return "success";
-    }
-
-    @GetMapping("/query")
-    public String testQuery() {
-
-        List<String> categoryNames = new ArrayList<>();
-        categoryNames.add("A");
-        categoryNames.add("B");
-        PageRequest pageRequest = PageRequest.of(1, 2);
-//        crossWordsCustomQuery.findByCategories(categoryNames,pageRequest);
-        return "SUCCESS";
     }
 
 

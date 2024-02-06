@@ -17,15 +17,16 @@ public class CrossWordsCustomQuery {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    private final String COLLECTION_NAME = "crossWords";
+    private final String KEY_FIELD_NAME = "categories";
+
     public Page<CrossWords> findByCategories(List<String> categoryNames, Pageable pageable) {
 
         Query query = new Query();
-        query.addCriteria(Criteria.where("categories").in(categoryNames));
+        query.addCriteria(Criteria.where(KEY_FIELD_NAME).in(categoryNames));
         query.with(pageable);
 
-        System.out.println(query.toString());
-        List<CrossWords> result = mongoTemplate.find(query, CrossWords.class, "crossWords");
-        System.out.println(result.get(0).getCategories());
+        List<CrossWords> result = mongoTemplate.find(query, CrossWords.class, COLLECTION_NAME);
 
         return PageableExecutionUtils.getPage(result, pageable,
                 () -> mongoTemplate.count(Query.of(query).limit(-1).skip(-1), CrossWords.class));

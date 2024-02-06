@@ -38,16 +38,19 @@ public class PuzzleServiceImpl implements PuzzleService {
 
     @Transactional
     public PuzzleDto getPuzzleById(String puzzleId, String answer) {
-        CrossWords crossWords = crossWordsRepository.findById(new ObjectId(puzzleId))
-                .orElseThrow(() ->
-                        new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
-                );
+        CrossWords crossWords = getCrossWordsById(puzzleId);
 
         if (!Boolean.parseBoolean(answer)) {
             updateViewCount(crossWords);
         }
-        System.out.println(crossWords.getAnswersInfo().get(0).getId());
         return crossWordsToPuzzleDto(crossWords, Boolean.parseBoolean(answer));
+    }
+
+    private CrossWords getCrossWordsById(String id) {
+        return crossWordsRepository.findById(new ObjectId(id))
+                .orElseThrow(() ->
+                        new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
+                );
     }
 
     private void updateViewCount(CrossWords crossWords) {
@@ -114,8 +117,12 @@ public class PuzzleServiceImpl implements PuzzleService {
 
         Page<CrossWords> crossWordsPage = crossWordsCustomQuery.findByCategories(categoryName, pageRequest);
 
+        return getPuzzleListDto(crossWordsPage);
+    }
+
+    private PuzzleListDto getPuzzleListDto(Page<CrossWords> crossWordsPage) {
         return PuzzleListDto.builder()
-                .categories(categoryName)
+                .categories(crossWordsPage.getContent().get(0).getCategories())
                 .puzzles(crossWordsPage.getContent().stream()
                         .map(this::getPuzzleDtoWithoutWords)
                         .toList())
@@ -141,10 +148,7 @@ public class PuzzleServiceImpl implements PuzzleService {
     @Transactional
     public boolean updatePuzzleSuccessCount(String puzzleId) {
 
-        CrossWords crossWords = crossWordsRepository.findById(new ObjectId(puzzleId))
-                .orElseThrow(() ->
-                        new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
-                );
+        CrossWords crossWords = getCrossWordsById(puzzleId);
         QuestionInfos questionInfos = crossWords.getQuestionInfos();
         questionInfos.addWinCount();
         questionInfoRepository.save(questionInfos);

@@ -51,9 +51,6 @@ public class PuzzleQueryController {
             @RequestParam(value = "limit", required = false, defaultValue = DEFAULT_LIMIT) int limit,
             @RequestParam(value = "sort", required = false, defaultValue = DEFAULT_SORT) String sort
     ) {
-
-        System.out.println(categoryNames.size() + "  " + categoryNames.get(0));
-
         PuzzleListDto puzzlePage = puzzleService.getPuzzlesByCategoryName(categoryNames, page, limit, sort);
 
         return ResponseEntity.status(HttpStatus.OK)
