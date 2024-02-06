@@ -17,4 +17,13 @@ public class QuestionInfos {
 
     private int viewCount;
     private int winCount;
+
+    public void addViewCount() {
+        this.viewCount++;
+    }
+
+    public void addWinCount() {
+        this.winCount++;
+    }
+
 }

@@ -1,18 +1,14 @@
 package com.example.crosspuzzleserver.controller.puzzle;
 
-import com.example.crosspuzzleserver.domain.CrossWords;
-import com.example.crosspuzzleserver.service.PuzzleServiceImpl;
-import com.example.crosspuzzleserver.service.dto.PuzzleDto;
+
 import com.example.crosspuzzleserver.service.spi.PuzzleService;
+import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,36 +20,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class PuzzleController {
 
     private final PuzzleService puzzleService;
-    private final static String DEFAULT_PAGE = "0";
-    private final static String DEFAULT_LIMIT = "12";
-    private final static String DEFAULT_SORT = "asc";
 
-    @GetMapping("")
-    public ResponseEntity<ApiResponse> getPuzzleById(
-            @RequestParam(value = "id", required = true) String id,
-            @RequestParam(value = "answer", required = true) String answer
+    @PostMapping("/complete")
+    public ResponseEntity<ApiResponse> updatePuzzleSuccessCount(
+            @RequestParam(value = "id") String puzzleId
     ) {
 
-        PuzzleDto puzzleDto = puzzleService.getPuzzleById(id, answer);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(puzzleDto));
-    }
-
-
-    @GetMapping("/list")
-    public ResponseEntity<ApiResponse> getPuzzleListByCategoryId(
-            @RequestParam(value = "category", required = false, defaultValue = "") List<String> categoryNames,
-            @RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) int page,
-            @RequestParam(value = "limit", required = false, defaultValue = DEFAULT_LIMIT) int limit,
-            @RequestParam(value = "sort", required = false, defaultValue = DEFAULT_SORT) String sort
-    ) {
-
-        System.out.println(categoryNames.size() + "  " + categoryNames.get(0));
-
-        Page<CrossWords> puzzlePage = puzzleService.getPuzzlesByCategoryName(categoryNames, page, limit, sort);
-
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResponse.success(puzzlePage));
+        boolean isSuccess = puzzleService.updatePuzzleSuccessCount(puzzleId);
+        if (isSuccess) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success("success"));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail(
+                        400, Error.FAIL_UPDATE_WIN_COUNT.getMessage()
+                ));
     }
 
 }

@@ -2,11 +2,15 @@ package com.example.crosspuzzleserver.service;
 
 import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.CrossWords;
+import com.example.crosspuzzleserver.domain.QuestionInfos;
 import com.example.crosspuzzleserver.domain.Words;
 import com.example.crosspuzzleserver.repository.CrossWordsCustomQuery;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
+import com.example.crosspuzzleserver.repository.QuestionInfoRepository;
 import com.example.crosspuzzleserver.service.dto.AnswerInfoDto;
 import com.example.crosspuzzleserver.service.dto.PuzzleDto;
+import com.example.crosspuzzleserver.service.dto.PuzzleDtoWithoutWords;
+import com.example.crosspuzzleserver.service.dto.PuzzleListDto;
 import com.example.crosspuzzleserver.service.dto.WordDto;
 import com.example.crosspuzzleserver.service.spi.PuzzleService;
 import com.example.crosspuzzleserver.util.error.Error;
@@ -16,10 +20,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,20 +34,32 @@ public class PuzzleServiceImpl implements PuzzleService {
 
     private final CrossWordsRepository crossWordsRepository;
     private final CrossWordsCustomQuery crossWordsCustomQuery;
+    private final QuestionInfoRepository questionInfoRepository;
 
-
+    @Transactional
     public PuzzleDto getPuzzleById(String puzzleId, String answer) {
-        CrossWords crossWords = crossWordsRepository.findById(puzzleId)
+        CrossWords crossWords = crossWordsRepository.findById(new ObjectId(puzzleId))
                 .orElseThrow(() ->
                         new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
                 );
+
+        if (!Boolean.parseBoolean(answer)) {
+            updateViewCount(crossWords);
+        }
         System.out.println(crossWords.getAnswersInfo().get(0).getId());
         return crossWordsToPuzzleDto(crossWords, Boolean.parseBoolean(answer));
     }
 
+    private void updateViewCount(CrossWords crossWords) {
+        QuestionInfos questionInfos = crossWords.getQuestionInfos();
+        questionInfos.addViewCount();
+        questionInfoRepository.save(questionInfos);
+        crossWordsRepository.save(crossWords);
+    }
+
     private PuzzleDto crossWordsToPuzzleDto(CrossWords crossWords, boolean includeValue) {
         return PuzzleDto.builder()
-                .id(crossWords.getId())
+                .id(String.valueOf(crossWords.getId()))
                 .views(crossWords.getQuestionInfos().getViewCount())
                 .wins(crossWords.getQuestionInfos().getWinCount())
                 .rowSize(crossWords.getRowSize())
@@ -88,13 +106,50 @@ public class PuzzleServiceImpl implements PuzzleService {
 
 
     @Override
-    public Page<CrossWords> getPuzzlesByCategoryName(List<String> categoryName, int page, int limit, String sort) {
+    @Transactional(readOnly = true)
+    public PuzzleListDto getPuzzlesByCategoryName(List<String> categoryName, int page, int limit, String sort) {
 
         Direction direction = getDirection(sort);
         PageRequest pageRequest = PageRequest.of(page, limit, direction, "_id");
 
-        return crossWordsCustomQuery.findByCategories(categoryName, pageRequest);
-//        return crossWordsRepository.findByCategoriesContains(categoryName, pageRequest);
+        Page<CrossWords> crossWordsPage = crossWordsCustomQuery.findByCategories(categoryName, pageRequest);
+
+        return PuzzleListDto.builder()
+                .categories(categoryName)
+                .puzzles(crossWordsPage.getContent().stream()
+                        .map(this::getPuzzleDtoWithoutWords)
+                        .toList())
+                .currentPageNumber(crossWordsPage.getPageable().getPageNumber())
+                .currentPageNumber(crossWordsPage.getPageable().getPageSize())
+                .sorted(crossWordsPage.getSort().toString())
+                .totalPage(crossWordsPage.getTotalPages())
+                .totalElement(crossWordsPage.getTotalElements())
+                .isLast(crossWordsPage.isLast())
+                .build();
+    }
+
+    private PuzzleDtoWithoutWords getPuzzleDtoWithoutWords(CrossWords crossWords) {
+
+        return PuzzleDtoWithoutWords.builder()
+                .id(String.valueOf(crossWords.getId()))
+                .wins(crossWords.getQuestionInfos().getWinCount())
+                .views(crossWords.getQuestionInfos().getViewCount())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public boolean updatePuzzleSuccessCount(String puzzleId) {
+
+        CrossWords crossWords = crossWordsRepository.findById(new ObjectId(puzzleId))
+                .orElseThrow(() ->
+                        new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
+                );
+        QuestionInfos questionInfos = crossWords.getQuestionInfos();
+        questionInfos.addWinCount();
+        questionInfoRepository.save(questionInfos);
+        crossWordsRepository.save(crossWords);
+        return true;
     }
 
 
