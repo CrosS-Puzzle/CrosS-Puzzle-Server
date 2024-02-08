@@ -10,5 +10,7 @@ public interface WordsRepository extends MongoRepository<Words, String> {
 
     Optional<List<Words>> findWordsByCategory(String category);
 
+    Optional<List<Words>> findWordsByCategoryId(ObjectId id);
+
     Optional<Words> findById(ObjectId id);
 }

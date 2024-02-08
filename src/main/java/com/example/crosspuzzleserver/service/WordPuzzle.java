@@ -1,20 +1,21 @@
 package com.example.crosspuzzleserver.service;
 
 import com.example.crosspuzzleserver.domain.AnswersInfo;
+import com.example.crosspuzzleserver.domain.Category;
 import com.example.crosspuzzleserver.domain.CrossWords;
 import com.example.crosspuzzleserver.domain.QuestionInfos;
 import com.example.crosspuzzleserver.domain.Words;
+import com.example.crosspuzzleserver.repository.AnswersInfoRepository;
+import com.example.crosspuzzleserver.repository.CategoryRepository;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
+import com.example.crosspuzzleserver.repository.QuestionInfoRepository;
 import com.example.crosspuzzleserver.repository.WordsRepository;
-import com.example.crosspuzzleserver.util.category.Category;
-import com.example.crosspuzzleserver.util.error.Error;
-import com.example.crosspuzzleserver.util.exception.NotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
@@ -23,6 +24,9 @@ public class WordPuzzle {
 
     private final CrossWordsRepository crossWordsRepository;
     private final WordsRepository wordsRepository;
+    private final CategoryRepository categoryRepository;
+    private final QuestionInfoRepository questionInfoRepository;
+    private final AnswersInfoRepository answersInfoRepository;
 
     class WordInfo {
         int x, y, direction, indexOfOverlap;
@@ -74,7 +78,7 @@ public class WordPuzzle {
         Words words;
     }
 
-    public void generateCrossWord(List<Category> categoryNameList) {
+    public void generateCrossWord(List<ObjectId> categoryIds) {
 //        String[] words = {"기차", "차돌박이", "돌잡이", "이쑤시개", "포세이돈", "개선문", "선물포장"};
 
         //String 이 아니라 Words 오브젝트를 리스트로 넘겨야함.
@@ -88,16 +92,15 @@ public class WordPuzzle {
 //        }
 
         List<Words> wordsList = new ArrayList<>();
-        for (Category categoryName : categoryNameList) {
-            List<Words> tmpList = wordsRepository.findWordsByCategory(categoryName.getName())
+        for (ObjectId categoryId : categoryIds) {
+            List<Words> tmpList = wordsRepository.findWordsByCategoryId(categoryId)
                     .orElse(new ArrayList<>());
             wordsList.addAll(tmpList);
         }
 
         //카테고리 enum을 string으로 변환
         CrossWords createdCrossWords = createPuzzle(wordsList,
-                categoryNameList.stream().map(Category::getName).collect(
-                        Collectors.toList()));
+                categoryIds.stream().map(categoryRepository::findById).toList());
 
         System.out.println(" \n");
         System.out.println("rowSize = " + createdCrossWords.getRowSize() + '\n');
@@ -113,6 +116,9 @@ public class WordPuzzle {
         System.out.println("\n");
 
         //createPuzzle  에 정답 리스트, 판을 자르기 위한 왼쪽위, 오른쪽 아래 좌표를 반환해야함.
+        answersInfoRepository.saveAll(createdCrossWords.getAnswersInfo());
+        questionInfoRepository.save(createdCrossWords.getQuestionInfos());
+
         crossWordsRepository.save(createdCrossWords);
     }
 
@@ -208,7 +214,7 @@ public class WordPuzzle {
         return result;
     }
 
-    CrossWords createPuzzle(List<Words> words, List<String> categoryNames) {
+    CrossWords createPuzzle(List<Words> words, List<Category> categories) {
         char[][] board = new char[25][25];
         for (int i = 0; i < 25; i++) {
             for (int j = 0; j < 25; j++) {
@@ -263,7 +269,7 @@ public class WordPuzzle {
                 .winCount(0)
                 .build();
         CrossWords crossWords = CrossWords.builder()
-                .categories(categoryNames)
+                .categories(categories)
                 .rowSize(rowSize)
                 .colSize(colSize)
                 .answersInfo(answersInfoList)

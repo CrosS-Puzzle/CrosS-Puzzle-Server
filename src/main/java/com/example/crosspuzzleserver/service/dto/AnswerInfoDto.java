@@ -10,6 +10,6 @@ public class AnswerInfoDto {
     private int[] coords;
     private int direction;
     private int length;
-    private WordDto wordDto;
+    private WordDto word;
 
 }

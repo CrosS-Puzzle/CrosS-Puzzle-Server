@@ -13,6 +13,7 @@ public class PuzzleDto {
     private int wins;
     private int rowSize;
     private int colSize;
-    private List<AnswerInfoDto> answerInfoDtoList;
+    private List<String> category;
+    private List<AnswerInfoDto> answerInfos;
 
 }

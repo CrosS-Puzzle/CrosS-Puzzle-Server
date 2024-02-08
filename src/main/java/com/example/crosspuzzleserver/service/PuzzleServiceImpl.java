@@ -1,6 +1,7 @@
 package com.example.crosspuzzleserver.service;
 
 import com.example.crosspuzzleserver.domain.AnswersInfo;
+import com.example.crosspuzzleserver.domain.Category;
 import com.example.crosspuzzleserver.domain.CrossWords;
 import com.example.crosspuzzleserver.domain.QuestionInfos;
 import com.example.crosspuzzleserver.domain.Words;
@@ -62,11 +63,12 @@ public class PuzzleServiceImpl implements PuzzleService {
     private PuzzleDto crossWordsToPuzzleDto(CrossWords crossWords, boolean includeValue) {
         return PuzzleDto.builder()
                 .id(String.valueOf(crossWords.getId()))
+                .category(crossWords.getCategories().stream().map(Category::getKoreanName).toList())
                 .views(crossWords.getQuestionInfos().getViewCount())
                 .wins(crossWords.getQuestionInfos().getWinCount())
                 .rowSize(crossWords.getRowSize())
                 .colSize(crossWords.getColSize())
-                .answerInfoDtoList(crossWords.getAnswersInfo().stream().map(
+                .answerInfos(crossWords.getAnswersInfo().stream().map(
                         answersInfo -> getAnswerInfoDto(answersInfo, includeValue)
                 ).collect(Collectors.toList()))
                 .build();
@@ -84,14 +86,13 @@ public class PuzzleServiceImpl implements PuzzleService {
                 .coords(answersInfo.getCoords())
                 .length(answersInfo.getWords().getValue().length())
                 .direction(answersInfo.getDirection())
-                .wordDto(wordDto)
+                .word(wordDto)
                 .build();
     }
 
 
     private WordDto wordsToWordDtoWithValue(Words words) {
         return WordDto.builder()
-                .category(words.getCategory())
                 .id(String.valueOf(words.getId()))
                 .value(words.getValue())
                 .description(words.getDescription())
@@ -100,7 +101,6 @@ public class PuzzleServiceImpl implements PuzzleService {
 
     private WordDto wordsToWordDtoWithOutValue(Words words) {
         return WordDto.builder()
-                .category(words.getCategory())
                 .id(String.valueOf(words.getId()))
                 .description(words.getDescription())
                 .build();
@@ -109,19 +109,21 @@ public class PuzzleServiceImpl implements PuzzleService {
 
     @Override
     @Transactional(readOnly = true)
-    public PuzzleListDto getPuzzlesByCategoryName(List<String> categoryName, int page, int limit, String sort) {
+    public PuzzleListDto getPuzzlesByCategoryIds(List<String> categoryIds, int page, int limit, String sort) {
 
         Direction direction = getDirection(sort);
         PageRequest pageRequest = PageRequest.of(page, limit, direction, "_id");
 
-        Page<CrossWords> crossWordsPage = crossWordsCustomQuery.findByCategories(categoryName, pageRequest);
+        Page<CrossWords> crossWordsPage = crossWordsCustomQuery.findByCategoryIds(categoryIds, pageRequest);
 
         return getPuzzleListDto(crossWordsPage);
     }
 
     private PuzzleListDto getPuzzleListDto(Page<CrossWords> crossWordsPage) {
         return PuzzleListDto.builder()
-                .categories(crossWordsPage.getContent().get(0).getCategories())
+                .categories(crossWordsPage.getContent().get(0).getCategories().stream()
+                        .map(Category::getKoreanName).collect(
+                                Collectors.toList()))
                 .puzzles(crossWordsPage.getContent().stream()
                         .map(this::getPuzzleDtoWithoutWords)
                         .toList())

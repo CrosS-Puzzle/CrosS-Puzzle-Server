@@ -45,13 +45,13 @@ public class PuzzleQueryController {
 
 
     @GetMapping("/list")
-    public ResponseEntity<ApiResponse> getPuzzleListByCategoryId(
-            @RequestParam(value = "category", required = false, defaultValue = "") List<String> categoryNames,
+    public ResponseEntity<ApiResponse> getPuzzleListByCategoryIds(
+            @RequestParam(value = "category", required = false, defaultValue = "") List<String> categoryIds,
             @RequestParam(value = "page", required = false, defaultValue = DEFAULT_PAGE) int page,
             @RequestParam(value = "limit", required = false, defaultValue = DEFAULT_LIMIT) int limit,
             @RequestParam(value = "sort", required = false, defaultValue = DEFAULT_SORT) String sort
     ) {
-        PuzzleListDto puzzlePage = puzzleService.getPuzzlesByCategoryName(categoryNames, page, limit, sort);
+        PuzzleListDto puzzlePage = puzzleService.getPuzzlesByCategoryIds(categoryIds, page, limit, sort);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(puzzlePage));

@@ -5,20 +5,17 @@ import lombok.Getter;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
-@Document("words")
+@Document
 @Getter
 @Builder
-public class Words {
+public class Category {
+
     @Id
-    ObjectId id;
+    private ObjectId id;
 
-    @DocumentReference
-    Category category;
+    private String name;
 
-    String value;
-
-    String description;
+    private String koreanName;
 
 }

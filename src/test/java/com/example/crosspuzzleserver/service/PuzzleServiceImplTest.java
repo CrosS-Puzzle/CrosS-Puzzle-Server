@@ -19,11 +19,11 @@ class PuzzleServiceImplTest {
 
     CrossWordsCustomQuery crossWordsCustomQuery;
 
-    @BeforeEach
-    void setUp() {
-//        puzzleService = new PuzzleServiceImpl(crossWordsRepository, categoryRepository);
-        crossWordsCustomQuery = new CrossWordsCustomQuery();
-    }
+//    @BeforeEach
+//    void setUp() {
+////        puzzleService = new PuzzleServiceImpl(crossWordsRepository, categoryRepository);
+//        crossWordsCustomQuery = new CrossWordsCustomQuery();
+//    }
 
 //    @Test
 //    @DisplayName("아이디로 퍼즐 조회 테스트")

@@ -8,7 +8,7 @@ public interface PuzzleService {
 
     PuzzleDto getPuzzleById(String puzzleId, String answer);
 
-    PuzzleListDto getPuzzlesByCategoryName(List<String> categoryNames, int page, int limit, String sort);
+    PuzzleListDto getPuzzlesByCategoryIds(List<String> categoryIds, int page, int limit, String sort);
 
     boolean updatePuzzleSuccessCount(String puzzleId);
 
