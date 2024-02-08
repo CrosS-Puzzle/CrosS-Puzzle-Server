@@ -1,10 +1,7 @@
 package com.example.crosspuzzleserver.controller;
 
 
-import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.Category;
-import com.example.crosspuzzleserver.domain.CrossWords;
-import com.example.crosspuzzleserver.domain.QuestionInfos;
 import com.example.crosspuzzleserver.domain.Words;
 import com.example.crosspuzzleserver.repository.AnswersInfoRepository;
 import com.example.crosspuzzleserver.repository.CategoryRepository;
@@ -18,7 +15,6 @@ import com.example.crosspuzzleserver.util.exception.BadRequestException;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
