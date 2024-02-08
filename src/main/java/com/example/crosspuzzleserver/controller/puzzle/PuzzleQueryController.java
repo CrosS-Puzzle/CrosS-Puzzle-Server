@@ -1,9 +1,11 @@
 package com.example.crosspuzzleserver.controller.puzzle;
 
+import com.example.crosspuzzleserver.service.dto.CategoryDto;
 import com.example.crosspuzzleserver.service.dto.CheckWordsDto;
 import com.example.crosspuzzleserver.service.dto.IsAnswerDto;
-import com.example.crosspuzzleserver.service.dto.PuzzleDto;
-import com.example.crosspuzzleserver.service.dto.PuzzleListDto;
+import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleDto;
+import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleListDto;
+import com.example.crosspuzzleserver.service.spi.CategoryService;
 import com.example.crosspuzzleserver.service.spi.PuzzleService;
 import com.example.crosspuzzleserver.service.spi.WordsService;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
@@ -27,6 +29,7 @@ public class PuzzleQueryController {
 
     private final PuzzleService puzzleService;
     private final WordsService wordsService;
+    private final CategoryService categoryService;
 
     private final static String DEFAULT_PAGE = "0";
     private final static String DEFAULT_LIMIT = "12";
@@ -69,6 +72,18 @@ public class PuzzleQueryController {
                         IsAnswerDto.builder()
                                 .success(isAns)
                                 .build()
+                ));
+    }
+
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse> getCategories() {
+
+        List<CategoryDto> categoryDtos = categoryService.getCategories();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        categoryDtos
                 ));
     }
 

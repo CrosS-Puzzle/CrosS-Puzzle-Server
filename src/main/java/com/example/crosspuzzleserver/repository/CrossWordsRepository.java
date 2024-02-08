@@ -1,5 +1,6 @@
 package com.example.crosspuzzleserver.repository;
 
+import com.example.crosspuzzleserver.domain.Category;
 import com.example.crosspuzzleserver.domain.CrossWords;
 import java.util.List;
 import java.util.Optional;
@@ -17,5 +18,7 @@ public interface CrossWordsRepository extends MongoRepository<CrossWords, String
     Optional<CrossWords> findById(ObjectId id);
 
     Page<CrossWords> findAll(Pageable pageable);
+
+    long countByCategories(Category category);
 
 }

@@ -1,7 +1,7 @@
 package com.example.crosspuzzleserver.service.spi;
 
-import com.example.crosspuzzleserver.service.dto.PuzzleDto;
-import com.example.crosspuzzleserver.service.dto.PuzzleListDto;
+import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleDto;
+import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleListDto;
 import java.util.List;
 
 public interface PuzzleService {

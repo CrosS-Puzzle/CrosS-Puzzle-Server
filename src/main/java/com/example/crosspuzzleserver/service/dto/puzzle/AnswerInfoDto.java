@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service.dto;
+package com.example.crosspuzzleserver.service.dto.puzzle;
 
 import lombok.Builder;
 import lombok.Getter;

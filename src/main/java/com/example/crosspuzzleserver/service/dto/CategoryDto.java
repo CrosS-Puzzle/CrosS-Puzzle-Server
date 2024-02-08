@@ -5,10 +5,13 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class PuzzleDtoWithoutWords {
+public class CategoryDto {
 
     private String id;
-    private int views;
-    private int wins;
 
+    private String name;
+
+    private String koreanName;
+
+    private long puzzleCount;
 }

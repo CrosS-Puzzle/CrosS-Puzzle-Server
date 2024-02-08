@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service.dto;
+package com.example.crosspuzzleserver.service.dto.puzzle;
 
 import java.util.List;
 import lombok.Builder;
