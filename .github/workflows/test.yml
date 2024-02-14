@@ -11,6 +11,7 @@ on:
   push:
     branches: [ "test" ]
 permissions:
+  id-token: write
   contents: read
 
 jobs:
