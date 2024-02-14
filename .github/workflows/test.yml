@@ -74,6 +74,6 @@ jobs:
           IMAGE_TAG: 1.0
         run: |
           zip -r deploy-$IMAGE_TAG.zip ./scripts appspec.yml
-          aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3://puzzle-deploy/deploy/
+          aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3:::puzzle-deploy
 
       
