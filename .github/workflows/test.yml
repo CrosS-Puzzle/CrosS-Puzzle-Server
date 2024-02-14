@@ -79,8 +79,8 @@ jobs:
         env:
           IMAGE_TAG: 1.0
         run: |
-          aws deploy create-deployment --application-name cross-puzzle-api \
+          aws deploy create-deployment --application-name CodeDeployTEST \
           --deployment-config-name CodeDeployDefault.OneAtATime \
-          --deployment-group-name CodeDeployTEST  \
+          --deployment-group-name deploy  \
           --s3-location bucket=puzzle-deploy,bundleType=zip,key=deploy-$IMAGE_TAG.zip
       
