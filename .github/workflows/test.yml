@@ -38,11 +38,6 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x test
 
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
