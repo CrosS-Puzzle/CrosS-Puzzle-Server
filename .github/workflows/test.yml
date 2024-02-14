@@ -62,5 +62,18 @@ jobs:
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          # 배포 스크립트 작성
+          mkdir scripts
+          touch scripts/deploy.sh
+          echo "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/deploy.sh
+          echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
+          echo "docker run -p 8080:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
+          
+      - name: upload to S3
+        env:
+          IMAGE_TAG: 1.0
+        run: |
+          zip -r deploy-$IMAGE_TAG.zip ./scripts appspec.yml
+          aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3://puzzle-deploy/deploy/
 
-
+      
