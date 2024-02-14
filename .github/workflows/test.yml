@@ -68,12 +68,19 @@ jobs:
           echo "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/deploy.sh
           echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
           echo "docker run -p 8080:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
-          
+
       - name: upload to S3
         env:
           IMAGE_TAG: 1.0
         run: |
           zip -r deploy-$IMAGE_TAG.zip ./scripts appspec.yml
           aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3://puzzle-deploy
-
+      - name: start deploy
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws deploy create-deployment --application-name cross-puzzle-api-codedeploy \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --deployment-group-name CodeDeployTEST  \
+          --s3-location bucket=puzzle-deploy,bundleType=zip,key=deploy-$IMAGE_TAG.zip
       
