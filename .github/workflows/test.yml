@@ -77,9 +77,9 @@ jobs:
           aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3://puzzle-deploy
       - name: start deploy
         env:
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: 1.0
         run: |
-          aws deploy create-deployment --application-name cross-puzzle-api-codedeploy \
+          aws deploy create-deployment --application-name cross-puzzle-api \
           --deployment-config-name CodeDeployDefault.OneAtATime \
           --deployment-group-name CodeDeployTEST  \
           --s3-location bucket=puzzle-deploy,bundleType=zip,key=deploy-$IMAGE_TAG.zip
