@@ -66,9 +66,9 @@ jobs:
           # 배포 스크립트 작성
           mkdir scripts
           touch scripts/applicationStart.sh
+          echo "sudo chmod 666 /var/run/docker.sock" >> scripts/applicationStart.sh
           echo "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/applicationStart.sh
           echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
-          echo "sudo chmod 666 /var/run/docker.sock" >> scripts/applicationStart.sh
           echo "docker run -p 80:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
 
 
