@@ -55,7 +55,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: 1.0
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           # 도커 컨테이너 빌드 및 ECR에 push
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -64,23 +64,24 @@ jobs:
           echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           # 배포 스크립트 작성
           mkdir scripts
-          touch scripts/deploy.sh
-          echo "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/deploy.sh
-          echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
-          echo "docker run -p 8080:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/deploy.sh
+          touch scripts/afterInstall.sh
+          echo "aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/afterInstall.sh
+          echo "docker pull \$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/afterInstall.sh
+          touch scripts/applicationStart.sh
+          echo "docker run -p 80:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
 
       - name: upload to S3
         env:
-          IMAGE_TAG: 1.0
+          IMAGE_TAG: ${{ github.sha }}
         run: |
           zip -r deploy-$IMAGE_TAG.zip ./scripts appspec.yml
-          aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3://puzzle-deploy
+          aws s3 cp --region ap-northeast-2 --acl private ./deploy-$IMAGE_TAG.zip s3://bluegreen-seongha/deploy-$IMAGE_TAG.zip
       - name: start deploy
         env:
-          IMAGE_TAG: 1.0
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          aws deploy create-deployment --application-name CodeDeployTEST \
+          aws deploy create-deployment \
+          --application-name BlueGreenCodeDeploy \
           --deployment-config-name CodeDeployDefault.OneAtATime \
-          --deployment-group-name deploy  \
+          --deployment-group-name BlueGreen  \
           --s3-location bucket=puzzle-deploy,bundleType=zip,key=deploy-$IMAGE_TAG.zip
-      
