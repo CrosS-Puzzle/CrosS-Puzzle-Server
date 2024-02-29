@@ -76,7 +76,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          zip -r deploy-$IMAGE_TAG.zip .appspec.yml ./scripts
+          zip -r deploy-$IMAGE_TAG.zip ./appspec.yml ./scripts
 
       - name: upload to S3
         env:
