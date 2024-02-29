@@ -71,14 +71,19 @@ jobs:
           touch scripts/applicationStart.sh
           echo "docker run -p 80:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
 
+
+      - name: Compress files
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          zip -r deploy-$IMAGE_TAG.zip .appspec.yml ./scripts
+
       - name: upload to S3
         env:
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-          AWS_REGION : ${{ secrets.AWS_REGION }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          zip -r deploy-$IMAGE_TAG.zip ./scripts appspec.yml
-          aws s3 cp --region $AWS_REGION --acl private ./deploy-$IMAGE_TAG.zip s3://$S3_BUCKET_NAME/deploy-$IMAGE_TAG.zip
+          aws s3 cp ./deploy-$IMAGE_TAG.zip s3://$S3_BUCKET_NAME/deploy-$IMAGE_TAG.zip
       - name: start deploy
         env:
           CODE_DEPLOY_APPLICATION_NAME: ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }}
