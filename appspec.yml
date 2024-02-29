@@ -13,10 +13,6 @@ permissions:
     mode: 755
 
 hooks:
-  AfterInstall:
-    - location: scripts/afterInstall.sh
-      timeout: 300
-      runas: ec2-user
   ApplicationStart:
     - location: scripts/applicationStart.sh
       timeout: 300
