@@ -1,0 +1,98 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "test" ]
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
+
+      - name: make application.yml
+        run: |
+          mkdir ./src/main/resources # resources 폴더 생성
+          echo "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
+
+      - run: |
+          cat ./src/main/resources/application.yml 
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+
+      - name: Build, tag and push the image to AWS ECR
+        id: build-image
+        env:
+          AWS_REGION : ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # 도커 컨테이너 빌드 및 ECR에 push
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          echo "Pushing image to ECR..."
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          # 배포 스크립트 작성
+          mkdir scripts
+          touch scripts/applicationStart.sh
+          echo "sudo chmod 666 /var/run/docker.sock" >> scripts/applicationStart.sh
+          echo "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/applicationStart.sh
+          echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
+          echo "docker run -p 80:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
+
+
+      - name: Compress files
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          zip -r deploy-$IMAGE_TAG.zip ./appspec.yml ./scripts
+
+      - name: upload to S3
+        env:
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws s3 cp ./deploy-$IMAGE_TAG.zip s3://$S3_BUCKET_NAME/deploy-$IMAGE_TAG.zip
+      - name: start deploy
+        env:
+          CODE_DEPLOY_APPLICATION_NAME: ${{ secrets.CODE_DEPLOY_APPLICATION_NAME }}
+          DEPLOY_GROUP_NAME: ${{ secrets.DEPLOY_GROUP_NAME }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          aws deploy create-deployment \
+          --application-name $CODE_DEPLOY_APPLICATION_NAME \
+          --deployment-config-name CodeDeployDefault.OneAtATime \
+          --deployment-group-name $DEPLOY_GROUP_NAME  \
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=deploy-$IMAGE_TAG.zip
