@@ -1,6 +1,5 @@
 package com.example.crosspuzzleserver.domain;
 
-import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import org.bson.types.ObjectId;
@@ -8,24 +7,18 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
-@Document
-@Builder
+@Document("words")
 @Getter
-public class CrossWords {
-
+@Builder
+public class Words {
     @Id
-    private ObjectId id;
+    ObjectId id;
 
     @DocumentReference
-    private List<Category> categories;
+    Category category;
 
-    private int rowSize;
-    private int colSize;
+    String value;
 
-    @DocumentReference
-    private QuestionInfos questionInfos;
-
-    @DocumentReference
-    private List<AnswersInfo> answersInfo;
+    String description;
 
 }

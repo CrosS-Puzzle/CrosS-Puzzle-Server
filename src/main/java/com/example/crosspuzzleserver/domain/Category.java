@@ -1,20 +1,21 @@
 package com.example.crosspuzzleserver.domain;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document("cross-puzzle")
+@Document
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class CrossPuzzle {
+@Builder
+public class Category {
 
     @Id
-    private String id;
+    private ObjectId id;
 
     private String name;
-    private Long age;
+
+    private String koreanName;
+
 }

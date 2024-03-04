@@ -1,25 +1,23 @@
 package com.example.crosspuzzleserver.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document("AnswersInfo")
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class AnswersInfo {
 
     @Id
-    private String id;
+    private ObjectId id;
 
     int[] coords;
 
-    String direction;
+    int direction;  //0이면 가로방향, 1이면 세로방향
 
-    String wordId;
+    private Words words;
+
 }

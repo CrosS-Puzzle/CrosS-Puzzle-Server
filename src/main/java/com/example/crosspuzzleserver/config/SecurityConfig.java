@@ -18,7 +18,8 @@ public class SecurityConfig {
         http
                 .cors((httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.disable()))
                 .csrf(httpSecurityCsrfConfigurer -> httpSecurityCsrfConfigurer.disable())
-                .authorizeHttpRequests(authorizedRequest -> authorizedRequest.requestMatchers("/*").permitAll());
+                .authorizeHttpRequests(
+                        authorizedRequest -> authorizedRequest.requestMatchers("/*", "/v1/puzzle/*").permitAll());
 
         return http.build();
     }
