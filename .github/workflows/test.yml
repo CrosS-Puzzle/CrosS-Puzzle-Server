@@ -81,7 +81,7 @@ jobs:
           #db 연결 작성
           touch scripts/afterInstall.sh
           echo "PUBLIC_IP=\$(curl ifconfig.me)" >> scripts/afterInstall.sh
-          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest --header \"Content-Type: application/json\" --header \"Accept: application/vnd.atlas.2023-11-15+json\"  --include --data '[{\"comment\": \"new instance\", \"ipAddress\": \"\'\$PUBLIC_IP\'\"}]'  --request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
+          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest --header \"Content-Type: application/json\" --header \"Accept: application/vnd.atlas.2023-11-15+json\"  --include --data '[{\"comment\": \"new instance\", \"ipAddress\": \"'\$PUBLIC_IP'\"}]'  --request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
 
       - name: Compress files
         env:
