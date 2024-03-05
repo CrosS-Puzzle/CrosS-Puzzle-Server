@@ -93,7 +93,7 @@ jobs:
           #db 연결 해제 작성
           touch scripts/afterBlockTraffic.sh
           echo "PUBLIC_IP=\$(curl ifconfig.me)" >> scripts/afterBlockTraffic.sh
-          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest --header \"Accept: application/vnd.atlas.2023-11-15+json\" --request DELETE \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList/\$PUBLIC_IP%2f32">> scripts/afterBlockTraffic.sh
+          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest --header \"Accept: application/vnd.atlas.2023-11-15+json\" --request DELETE \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList/\$PUBLIC_IP%2f32\"">> scripts/afterBlockTraffic.sh
 
 
       - name: Compress files
