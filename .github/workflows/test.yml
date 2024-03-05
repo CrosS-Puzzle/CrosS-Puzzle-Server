@@ -53,7 +53,7 @@ jobs:
       - name: Build, tag and push the image to AWS ECR
         id: build-image
         env:
-          AWS_REGION : ${{ secrets.AWS_REGION }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
           IMAGE_TAG: ${{ github.sha }}
@@ -76,7 +76,12 @@ jobs:
           #db 연결 작성
           touch scripts/afterInstall.sh
           echo "PUBLIC_IP = \$(curl curl ifconfig.me)" >> scripts/afterInstall.sh
-          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest \n --header \"Content-Type: application/json\" \n --header \"Accept: application/vnd.atlas.2023-11-15+json\" \n --include \n --data '[{\"comment\": \"new instance\", \"ipAddress\":\"$PUBLIC_IP\"}]' \n --request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
+          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest \
+          --header \"Content-Type: application/json\" \
+          --header \"Accept: application/vnd.atlas.2023-11-15+json\" \
+          --include \
+          --data '[{\"comment\": \"new instance\", \"ipAddress\":\"$PUBLIC_IP\"}]' \
+          --request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
 
       - name: Compress files
         env:
