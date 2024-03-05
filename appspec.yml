@@ -13,3 +13,5 @@ hooks:
     - location: scripts/applicationStart.sh
       timeout: 300
 
+  AfterAllowTraffic:
+    - location: scripts/afterAllowTraffic.sh

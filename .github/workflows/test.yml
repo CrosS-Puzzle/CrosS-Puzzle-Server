@@ -83,6 +83,19 @@ jobs:
           echo "PUBLIC_IP=\$(curl ifconfig.me)" >> scripts/afterInstall.sh
           echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest --header \"Content-Type: application/json\" --header \"Accept: application/vnd.atlas.2023-11-15+json\"  --include --data '[{\"comment\": \"new instance\", \"ipAddress\": \"'\$PUBLIC_IP'\"}]'  --request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
 
+      - name: describe afterAllowTraffic shell
+        id: describe-afterAllowTraffic
+        env:
+          DB_PUBLIC_KEY: ${{ secrets.DB_PUBLIC_KEY }}
+          DB_PRIVATE_KEY: ${{ secrets.DB_PRIVATE_KEY }}
+          DB_GROUP_ID: ${{ secrets.DB_GROUP_ID }}
+        run: |
+          #db 연결 작성
+          touch scripts/afterAllowTraffic.sh
+          echo "PUBLIC_IP=\$(curl ifconfig.me)" >> scripts/afterAllowTraffic.sh
+          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest --header \"Accept: application/vnd.atlas.2023-11-15+json\" --request DELETE \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList/'\$PUBLIC_IP'\"">> scripts/afterAllowTraffic.sh
+
+
       - name: Compress files
         env:
           IMAGE_TAG: ${{ github.sha }}
