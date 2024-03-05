@@ -6,6 +6,10 @@ files:
     overwrite: yes
 
 hooks:
+  AfterInstall:
+    - location: scripts/afterInstall.sh
+
   ApplicationStart:
     - location: scripts/applicationStart.sh
       timeout: 300
+
