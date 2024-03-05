@@ -58,7 +58,7 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY_NAME }}
           IMAGE_TAG: ${{ github.sha }}
           DB_PUBLIC_KEY: ${{ secrets.DB_PUBLIC_KEY }}
-          DB_PRIVATE-KEY: ${{ secrets.DB_PRIVATE-KEY }}
+          DB_PRIVATE_KEY: ${{ secrets.DB_PRIVATE_KEY }}
           DB_GROUP_ID: ${{ secrets.DB_GROUP_ID }}
         run: |
           # 도커 컨테이너 빌드 및 ECR에 push
@@ -75,7 +75,7 @@ jobs:
           echo "docker run -p 80:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
           #db 연결 작성
           touch scripts/afterInstall.sh
-          echo "PUBLIC_IP = \$(curl curl ifconfig.me)"
+          echo "PUBLIC_IP = \$(curl curl ifconfig.me)" >> scripts/afterInstall.sh
           echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest \n --header \"Content-Type: application/json\" \n --header \"Accept: application/vnd.atlas.2023-11-15+json\" \n --include \n --data '[{\"comment\": \"new instance\", \"ipAddress\":\"$PUBLIC_IP\"}]' \n --request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
 
       - name: Compress files
