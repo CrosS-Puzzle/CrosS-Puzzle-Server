@@ -83,6 +83,25 @@ jobs:
           echo "--data '[{\"comment\": \"new instance\", \"ipAddress\":\"$PUBLIC_IP\"}]' " >> scripts/afterInstall.sh
           echo "--request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
 
+
+      - name: describe afterInstall shell
+        id: describe afterInstall
+        env:
+          DB_PUBLIC_KEY: ${{ secrets.DB_PUBLIC_KEY }}
+          DB_PRIVATE_KEY: ${{ secrets.DB_PRIVATE_KEY }}
+          DB_GROUP_ID: ${{ secrets.DB_GROUP_ID }}
+        run: |
+          #db 연결 작성
+          touch scripts/afterInstall.sh
+          echo "PUBLIC_IP = \$(curl curl ifconfig.me)" >> scripts/afterInstall.sh
+          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest" >> scripts/afterInstall.sh
+          echo "--header \"Content-Type: application/json\"" >> scripts/afterInstall.sh
+          echo "--header \"Accept: application/vnd.atlas.2023-11-15+json\"" >> scripts/afterInstall.sh
+          echo "--include " >> scripts/afterInstall.sh
+          echo "--data '[{\"comment\": \"new instance\", \"ipAddress\":\"$PUBLIC_IP\"}]'" >> scripts/afterInstall.sh
+          echo "--request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
+
+
       - name: Compress files
         env:
           IMAGE_TAG: ${{ github.sha }}
