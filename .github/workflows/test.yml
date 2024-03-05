@@ -85,7 +85,7 @@ jobs:
 
 
       - name: describe afterInstall shell
-        id: describe afterInstall
+        id: describe-afterInstall
         env:
           DB_PUBLIC_KEY: ${{ secrets.DB_PUBLIC_KEY }}
           DB_PRIVATE_KEY: ${{ secrets.DB_PRIVATE_KEY }}
