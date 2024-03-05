@@ -73,16 +73,6 @@ jobs:
           echo "aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY" >> scripts/applicationStart.sh
           echo "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
           echo "docker run -p 80:8080 -e PROFILE=local -d --restart always --name cross-puzzle-api $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> scripts/applicationStart.sh
-          #db 연결 작성
-          touch scripts/afterInstall.sh
-          echo "PUBLIC_IP = \$(curl curl ifconfig.me)" >> scripts/afterInstall.sh
-          echo "curl --user \"$DB_PUBLIC_KEY:$DB_PRIVATE_KEY\" --digest " >> scripts/afterInstall.sh
-          echo "--header \"Content-Type: application/json\" " >> scripts/afterInstall.sh
-          echo "--header \"Accept: application/vnd.atlas.2023-11-15+json\" " >> scripts/afterInstall.sh
-          echo "--include " >> scripts/afterInstall.sh
-          echo "--data '[{\"comment\": \"new instance\", \"ipAddress\":\"$PUBLIC_IP\"}]' " >> scripts/afterInstall.sh
-          echo "--request POST \"https://cloud.mongodb.com/api/atlas/v2/groups/$DB_GROUP_ID/accessList\"">> scripts/afterInstall.sh
-
 
       - name: describe afterInstall shell
         id: describe-afterInstall
