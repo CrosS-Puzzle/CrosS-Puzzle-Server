@@ -38,9 +38,8 @@ public class PuzzleQueryController {
     @GetMapping("")
     public ResponseEntity<ApiResponse> getPuzzleById(
             @RequestParam(value = "id", required = true) String id,
-            @RequestParam(value = "answer", required = true) String answer
+            @RequestParam(value = "answer", required = false, defaultValue = "false") String answer
     ) {
-
         PuzzleDto puzzleDto = puzzleService.getPuzzleById(id, answer);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(puzzleDto));
@@ -64,9 +63,7 @@ public class PuzzleQueryController {
     @PostMapping("/check")
     public ResponseEntity<ApiResponse> checkWords(
             @RequestBody CheckWordsDto checkWordsDto) {
-
         boolean isAns = wordsService.checkWords(checkWordsDto);
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(
                         IsAnswerDto.builder()
@@ -78,9 +75,7 @@ public class PuzzleQueryController {
 
     @GetMapping("/categories")
     public ResponseEntity<ApiResponse> getCategories() {
-
         List<CategoryDto> categoryDtos = categoryService.getCategories();
-
         return ResponseEntity.status(HttpStatus.OK)
                 .body(ApiResponse.success(
                         categoryDtos
