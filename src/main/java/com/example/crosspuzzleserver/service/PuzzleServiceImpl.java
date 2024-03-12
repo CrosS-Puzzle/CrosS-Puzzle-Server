@@ -115,7 +115,6 @@ public class PuzzleServiceImpl implements PuzzleService {
         PageRequest pageRequest = PageRequest.of(page, limit, direction, "_id");
 
         Page<CrossWords> crossWordsPage = crossWordsCustomQuery.findByCategoryIds(categoryIds, pageRequest);
-
         return getPuzzleListDto(crossWordsPage);
     }
 
@@ -128,8 +127,8 @@ public class PuzzleServiceImpl implements PuzzleService {
                         .map(this::getPuzzleDtoWithoutWords)
                         .toList())
                 .currentPageNumber(crossWordsPage.getPageable().getPageNumber())
-                .currentPageNumber(crossWordsPage.getPageable().getPageSize())
-                .sorted(crossWordsPage.getSort().toString())
+                .currentPageSize(crossWordsPage.getPageable().getPageSize())
+                .sorted(crossWordsPage.getSort().toString().split(": ")[1])
                 .totalPage(crossWordsPage.getTotalPages())
                 .totalElement(crossWordsPage.getTotalElements())
                 .isLast(crossWordsPage.isLast())
