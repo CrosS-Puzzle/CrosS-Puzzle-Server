@@ -28,6 +28,8 @@ public class WordPuzzle {
     private final QuestionInfoRepository questionInfoRepository;
     private final AnswersInfoRepository answersInfoRepository;
 
+    public static final int BOARD_SIZE = 15;
+
     class WordInfo {
         int x, y, direction, indexOfOverlap;
         Words word;
@@ -79,7 +81,6 @@ public class WordPuzzle {
     }
 
     public void generateCrossWord(List<ObjectId> categoryIds) {
-//        String[] words = {"기차", "차돌박이", "돌잡이", "이쑤시개", "포세이돈", "개선문", "선물포장"};
 
         //String 이 아니라 Words 오브젝트를 리스트로 넘겨야함.
 //        List<Words> wordsList = new ArrayList<>();
@@ -93,12 +94,15 @@ public class WordPuzzle {
 
         List<Words> wordsList = new ArrayList<>();
         for (ObjectId categoryId : categoryIds) {
-            List<Words> tmpList = wordsRepository.findWordsByCategoryId(categoryId)
+            List<Words> tmpList = wordsRepository.findWordsByCategory(categoryId.toString())
                     .orElse(new ArrayList<>());
             wordsList.addAll(tmpList);
         }
 
-        //카테고리 enum을 string으로 변환
+//        System.out.println("@@@ before " + wordsList.size());
+//        for (Words words : wordsList) {
+//            System.out.println(words.getValue());
+//        }
         CrossWords createdCrossWords = createPuzzle(wordsList,
                 categoryIds.stream().map(categoryRepository::findById).toList());
 
@@ -126,7 +130,7 @@ public class WordPuzzle {
     boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
                     int direction) {
 
-        int boardSize = board.length;
+        int boardSize = BOARD_SIZE;
         int wordLength = word.getValue().length();
 
         int startX = overLapPosX - overlapIndex * insertDirection[direction][0];
@@ -180,11 +184,14 @@ public class WordPuzzle {
     }
 
     boolean isCellBlocked(char[][] board, int x, int y) {
-        return board[x][y] == 'x';
+        return board[x][y] == 'X';
     }
 
     boolean isCellOccupied(char[][] board, int x, int y) {
-        return board[x][y] != 'x' && board[x][y] != 'ㅡ';
+        if (x < 0 || y < 0 || x >= BOARD_SIZE || y >= BOARD_SIZE) {
+            return false;
+        }
+        return board[x][y] != 'X' && board[x][y] != 'ㅡ';
     }
 
 
@@ -193,18 +200,14 @@ public class WordPuzzle {
         List<WordInfo> result = new ArrayList<>();
 
         for (int i = 0; i < previousWord.getValue().length(); i++) {
-            List<Words> candidates = new ArrayList<>();
-            for (Words word : unusedWords) {
-                if (word.getValue().contains(String.valueOf(previousWord.getValue().charAt(i)))) {
-                    candidates.add(word);
-                }
-            }
-
-            for (Words candidate : candidates) {
+            for (Words candidate : unusedWords) {
                 int x = (previousDirection == 1) ? startX + i : startX;
                 int y = (previousDirection == 0) ? startY + i : startY;
 
                 int indexOfOverlap = candidate.getValue().indexOf(previousWord.getValue().charAt(i));
+                if (indexOfOverlap == -1) {
+                    continue;
+                }
 
                 WordInfo info = new WordInfo(x, y, (previousDirection == 0) ? 1 : 0, indexOfOverlap, candidate);
                 result.add(info);
@@ -215,26 +218,23 @@ public class WordPuzzle {
     }
 
     CrossWords createPuzzle(List<Words> words, List<Category> categories) {
-        char[][] board = new char[25][25];
-        for (int i = 0; i < 25; i++) {
-            for (int j = 0; j < 25; j++) {
+        char[][] board = new char[BOARD_SIZE][BOARD_SIZE];
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
                 board[i][j] = 'ㅡ';
             }
         }
         List<Words> usedWords = new ArrayList<>();
-
-        int x = 10;
-        int y = 10;
-
+        int randInt = (int) ((Math.random() * (10 - 0)) + 0);
+        int x = BOARD_SIZE / 2 - 5 + randInt;
+        int y = BOARD_SIZE / 2 - 5 + (10 - randInt);
         for (int i = 0; i < words.get(0).getValue().length(); i++) {
             board[x][y + i] = words.get(0).getValue().charAt(i);
             usedWords.add(words.get(0));
         }
 
-        System.out.println(words.get(0).getValue() + " " + x + " " + y + " " + 0);
-
-        board[x][y - 1] = 'x';
-        board[x][y + words.get(0).getValue().length()] = 'x';
+        board[x][y - 1] = 'X';
+        board[x][y + words.get(0).getValue().length()] = 'X';
 
         List<WordInfo> overlaps = findOverlaps(words.get(0), 0, x, y, words.subList(1, words.size()));
 
@@ -295,14 +295,15 @@ public class WordPuzzle {
         int[] maxIndex = new int[]{10, usedWords.get(0).getValue().length() + 10};
 
         while (!newConnectionInfo.isEmpty()) {
-            WordInfo wordInfo = newConnectionInfo.remove(0);
+            int randInt = (int) ((Math.random() * (newConnectionInfo.size() - 0)) + 0);
+
+            WordInfo wordInfo = newConnectionInfo.remove(randInt);
 
             if (!isValid(newBoard, wordInfo.indexOfOverlap, wordInfo.x, wordInfo.y, wordInfo.word, wordInfo.direction)
                     ||
                     usedWords.contains(wordInfo.word)) {
                 continue;
             }
-
             usedWords.add(wordInfo.word);
             AnswersInfoDAO additionalAnswersInfo = AnswersInfoDAO.builder()
                     .words(wordInfo.word)
@@ -332,7 +333,7 @@ public class WordPuzzle {
                 }
             }
 
-            System.out.println(wordInfo.word + " " +
+            System.out.println(wordInfo.word.getValue() + " " +
                     ((wordInfo.direction == 0) ? wordInfo.x : wordInfo.x - wordInfo.indexOfOverlap) + " " +
                     ((wordInfo.direction == 0) ? wordInfo.y - wordInfo.indexOfOverlap : wordInfo.y) + " " +
                     wordInfo.direction);
@@ -355,7 +356,7 @@ public class WordPuzzle {
             int nextX = endX + insertDirection[direction][0];
             int nextY = endY + insertDirection[direction][1];
 
-            //블럭처리
+            //단어추가 및 블럭처리
             for (int i = 0; i < wordValue.length(); i++) {
                 int nx = startX + i * insertDirection[direction][0];
                 int ny = startY + i * insertDirection[direction][1];
@@ -365,12 +366,11 @@ public class WordPuzzle {
                 for (CheckList checkList : checkLists) {
                     int[] check = checkList.check;
                     List<int[]> block = checkList.block;
-
                     if (isCellOccupied(board, nx + check[0], ny + check[1])) {
                         for (int[] b : block) {
                             if (isCellEmpty(board, nx + b[0], ny + b[1]) &&
                                     !isCellBlocked(board, nx + b[0], ny + b[1])) {
-                                board[nx + b[0]][ny + b[1]] = 'x';
+                                board[nx + b[0]][ny + b[1]] = 'X';
                             }
                         }
                     }
@@ -379,10 +379,10 @@ public class WordPuzzle {
             }
 
             //삽입후 단어 앞뒤막기
-            if (prevX >= 0 && prevY >= 0 && nextX < board.length && nextY < board.length) {
-                if (isCellOccupied(board, prevX, prevY) && isCellOccupied(board, nextX, nextY)) {
-                    board[prevX][prevY] = 'x';
-                    board[nextX][nextY] = 'x';
+            if (prevX >= 0 && prevY >= 0 && nextX < BOARD_SIZE && nextY < BOARD_SIZE) {
+                if (!isCellOccupied(board, prevX, prevY) && !isCellOccupied(board, nextX, nextY)) {
+                    board[prevX][prevY] = 'X';
+                    board[nextX][nextY] = 'X';
                 }
             }
 

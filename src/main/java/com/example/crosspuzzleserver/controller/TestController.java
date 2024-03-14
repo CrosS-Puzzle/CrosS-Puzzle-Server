@@ -115,6 +115,7 @@ public class TestController {
 
         List<ObjectId> categories = new ArrayList<>();
         categories.add(categoryRepository.findAll().get(0).getId());
+        System.out.println("@@@" + categories.get(0));
         wordPuzzle.generateCrossWord(categories);
 
         return "success";

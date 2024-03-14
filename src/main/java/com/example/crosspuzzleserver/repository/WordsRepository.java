@@ -6,11 +6,11 @@ import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface WordsRepository extends MongoRepository<Words, String> {
+public interface WordsRepository extends MongoRepository<Words, ObjectId> {
 
-    Optional<List<Words>> findWordsByCategory(String category);
+//    Optional<List<Words>> findWordsByCategory(String category);
 
-    Optional<List<Words>> findWordsByCategoryId(ObjectId id);
+    Optional<List<Words>> findWordsByCategory(String objectId);
 
     Optional<Words> findById(ObjectId id);
 }
