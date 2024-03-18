@@ -238,11 +238,11 @@ public class WordPuzzle {
 
         List<WordInfo> overlaps = findOverlaps(words.get(0), 0, x, y, words.subList(1, words.size()));
 
-        PuzzleResult puzzleResult = create(board, usedWords, words.subList(1, words.size()), overlaps);
+        PuzzleResult puzzleResult = create(board, usedWords, words.subList(1, words.size()), overlaps, x, y);
 
         //create 에서 보드를 자를 왼쪽위 좌표와 오른쪽 아래 좌표를 가져와야함.
-        int rowSize = puzzleResult.maxIndex[0] - puzzleResult.minIndex[0];
-        int colSize = puzzleResult.maxIndex[1] - puzzleResult.minIndex[1];
+        int rowSize = Math.max(1, puzzleResult.maxIndex[0] - puzzleResult.minIndex[0]);
+        int colSize = Math.max(1, puzzleResult.maxIndex[1] - puzzleResult.minIndex[1]);
 
         List<AnswersInfo> answersInfoList = new ArrayList<>();
         answersInfoList.add(AnswersInfo.builder()
@@ -287,12 +287,12 @@ public class WordPuzzle {
     }
 
     PuzzleResult create(char[][] board, List<Words> usedWords, List<Words> unusedWords,
-                        List<WordInfo> connectionInfo) {
+                        List<WordInfo> connectionInfo, int minX, int minY) {
         List<WordInfo> newConnectionInfo = new ArrayList<>(connectionInfo);
         char[][] newBoard = board;
         List<AnswersInfoDAO> answersInfoList = new ArrayList<>();
-        int[] minIndex = new int[]{10, 10};
-        int[] maxIndex = new int[]{10, usedWords.get(0).getValue().length() + 10};
+        int[] minIndex = new int[]{minX, minY};
+        int[] maxIndex = new int[]{minX, usedWords.get(0).getValue().length() + minY};
 
         while (!newConnectionInfo.isEmpty()) {
             int randInt = (int) ((Math.random() * (newConnectionInfo.size() - 0)) + 0);
