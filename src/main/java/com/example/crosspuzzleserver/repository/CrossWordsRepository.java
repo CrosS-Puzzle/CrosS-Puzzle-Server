@@ -22,6 +22,6 @@ public interface CrossWordsRepository extends MongoRepository<CrossWords, String
     long countByCategories(Category category);
 
     @Query("SELECT cw FROM CrossWords cw WHERE cw.categoryId IN :categoryIds")
-    List<CrossWords> getCrossWordsByCategoryIds(@Param("categoryIds") List<ObjectId> categoryIds);
+    Optional<List<CrossWords>> getCrossWordsByCategoryIds(@Param("categoryIds") List<ObjectId> categoryIds);
 
 }

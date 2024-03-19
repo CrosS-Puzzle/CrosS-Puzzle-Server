@@ -8,9 +8,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface WordsRepository extends MongoRepository<Words, ObjectId> {
 
-//    Optional<List<Words>> findWordsByCategory(String category);
-
-    Optional<List<Words>> findWordsByCategory(String objectId);
+    Optional<List<Words>> findWordsByCategory(ObjectId objectId);
 
     Optional<Words> findById(ObjectId id);
 }

@@ -5,19 +5,18 @@ import com.example.crosspuzzleserver.domain.Category;
 import com.example.crosspuzzleserver.domain.CrossWords;
 import com.example.crosspuzzleserver.domain.QuestionInfos;
 import com.example.crosspuzzleserver.domain.Words;
-import com.example.crosspuzzleserver.repository.AnswersInfoRepository;
 import com.example.crosspuzzleserver.repository.CategoryRepository;
-import com.example.crosspuzzleserver.repository.CrossWordsRepository;
-import com.example.crosspuzzleserver.repository.QuestionInfoRepository;
 import com.example.crosspuzzleserver.repository.WordsRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class WordPuzzle {
@@ -79,27 +78,13 @@ public class WordPuzzle {
 
     public CrossWords generateCrossWord(List<ObjectId> categoryIds) {
 
-        //String 이 아니라 Words 오브젝트를 리스트로 넘겨야함.
-//        List<Words> wordsList = new ArrayList<>();
-//        for (int i = 0; i < words.length; i++) {
-//            wordsList.add(
-//                    Words.builder()
-//                            .value(words[i])
-//                            .build()
-//            );
-//        }
-
         List<Words> wordsList = new ArrayList<>();
         for (ObjectId categoryId : categoryIds) {
-            List<Words> tmpList = wordsRepository.findWordsByCategory(categoryId.toString())
+            List<Words> tmpList = wordsRepository.findWordsByCategory(categoryId)
                     .orElse(new ArrayList<>());
             wordsList.addAll(tmpList);
         }
 
-//        System.out.println("@@@ before " + wordsList.size());
-//        for (Words words : wordsList) {
-//            System.out.println(words.getValue());
-//        }
         CrossWords createdCrossWords = createPuzzle(wordsList,
                 categoryIds.stream().map(categoryRepository::findById).toList());
 
@@ -115,7 +100,6 @@ public class WordPuzzle {
         }
 
         System.out.println("\n");
-
         //createPuzzle  에 정답 리스트, 판을 자르기 위한 왼쪽위, 오른쪽 아래 좌표를 반환해야함
         return createdCrossWords;
     }
@@ -222,6 +206,8 @@ public class WordPuzzle {
         int randInt = (int) ((Math.random() * (10 - 0)) + 0);
         int x = BOARD_SIZE / 2 - 5 + randInt;
         int y = BOARD_SIZE / 2 - 5 + (10 - randInt);
+
+        // 시작 단어가 Index 벗어나면 오류터짐 수정 필요  추가로 X표시 할 때 인덱스 안벗어나게 해야함.
         for (int i = 0; i < words.get(0).getValue().length(); i++) {
             board[x][y + i] = words.get(0).getValue().charAt(i);
             usedWords.add(words.get(0));
@@ -298,6 +284,7 @@ public class WordPuzzle {
                     usedWords.contains(wordInfo.word)) {
                 continue;
             }
+
             usedWords.add(wordInfo.word);
             AnswersInfoDAO additionalAnswersInfo = AnswersInfoDAO.builder()
                     .words(wordInfo.word)
@@ -373,11 +360,11 @@ public class WordPuzzle {
             }
 
             //삽입후 단어 앞뒤막기
-            if (prevX >= 0 && prevY >= 0 && nextX < BOARD_SIZE && nextY < BOARD_SIZE) {
-                if (!isCellOccupied(board, prevX, prevY) && !isCellOccupied(board, nextX, nextY)) {
-                    board[prevX][prevY] = 'X';
-                    board[nextX][nextY] = 'X';
-                }
+            if (prevX >= 0 && prevY >= 0 && !isCellOccupied(board, prevX, prevY)) {
+                board[prevX][prevY] = 'X';
+            }
+            if (nextX < BOARD_SIZE && nextY < BOARD_SIZE && !isCellOccupied(board, nextX, nextY)) {
+                board[nextX][nextY] = 'X';
             }
 
             List<WordInfo> additionalConnectionInfo = findOverlaps(

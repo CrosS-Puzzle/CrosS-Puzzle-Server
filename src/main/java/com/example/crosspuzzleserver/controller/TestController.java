@@ -24,6 +24,7 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -120,7 +121,7 @@ public class TestController {
         List<ObjectId> categories = new ArrayList<>();
         categories.add(categoryRepository.findAll().get(0).getId());
         System.out.println("@@@" + categories.get(0));
-//        wordPuzzle.generateCrossWord(categories);
+        wordPuzzle.generateCrossWord(categories);
 
         if (puzzleGenService.generatePuzzle()) {
             return "success";
@@ -128,5 +129,13 @@ public class TestController {
         return "duplicated";
     }
 
+
+    @GetMapping("/mig")
+    public void mig() {
+        List<ObjectId> categories = new ArrayList<>();
+        categories.add(categoryRepository.findAll().get(0).getId());
+        System.out.println("@@@" + categories.get(0));
+        puzzleGenService.generatePuzzle();
+    }
 
 }

@@ -14,6 +14,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -28,6 +29,7 @@ public class PuzzleGenImpl implements PuzzleGenService {
     private final CrossWordsRepository crossWordsRepository;
 
     @Override
+    @Scheduled(cron = "0/10 * * * * *")
     public boolean generatePuzzle() {
 
         List<ObjectId> randomCategoryId = getRandomCategoryIds();
@@ -39,6 +41,7 @@ public class PuzzleGenImpl implements PuzzleGenService {
             log.info("duplicated puzzle");
             return false;
         }
+        log.info("create puzzle success");
         answersInfoRepository.saveAll(crossWords.getAnswersInfo());
         questionInfoRepository.save(crossWords.getQuestionInfos());
         crossWordsRepository.save(crossWords);
@@ -46,16 +49,16 @@ public class PuzzleGenImpl implements PuzzleGenService {
     }
 
     private boolean isDuplicated(CrossWords crossWords) {
-
         List<ObjectId> categoryIds = new ArrayList<>();
         for (Category c : crossWords.getCategories()) {
             categoryIds.add(c.getId());
         }
         //카테고리 아이디를 통해 전부 가져와서
-        List<CrossWords> crossWordsList = crossWordsRepository.getCrossWordsByCategoryIds(categoryIds);
+        List<CrossWords> crossWordsList = crossWordsRepository.getCrossWordsByCategoryIds(categoryIds)
+                .orElse(new ArrayList<>());
         //중복체크
         for (CrossWords cw : crossWordsList) {
-            if (checkDuplicated(cw, crossWords)) {
+            if (isDuplicatedWords(cw, crossWords)) {
                 return true;
             }
         }
@@ -72,11 +75,11 @@ public class PuzzleGenImpl implements PuzzleGenService {
         return categoryIds;
     }
 
-    private boolean checkDuplicated(CrossWords cw, CrossWords origin) {
+    private boolean isDuplicatedWords(CrossWords cw, CrossWords origin) {
         Set<String> cwWordsSet = new HashSet<>(getWordsValueList(cw.getAnswersInfo()));
         Set<String> originWordsSet = new HashSet<>(getWordsValueList(origin.getAnswersInfo()));
 
-        return cwWordsSet.size() != originWordsSet.size();
+        return cwWordsSet.size() == originWordsSet.size();
     }
 
     private List<String> getWordsValueList(List<AnswersInfo> answersInfoList) {
