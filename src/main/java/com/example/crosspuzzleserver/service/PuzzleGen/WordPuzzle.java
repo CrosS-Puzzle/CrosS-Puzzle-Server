@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service;
+package com.example.crosspuzzleserver.service.PuzzleGen;
 
 import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.Category;
@@ -22,11 +22,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class WordPuzzle {
 
-    private final CrossWordsRepository crossWordsRepository;
     private final WordsRepository wordsRepository;
     private final CategoryRepository categoryRepository;
-    private final QuestionInfoRepository questionInfoRepository;
-    private final AnswersInfoRepository answersInfoRepository;
 
     public static final int BOARD_SIZE = 15;
 
@@ -80,7 +77,7 @@ public class WordPuzzle {
         Words words;
     }
 
-    public void generateCrossWord(List<ObjectId> categoryIds) {
+    public CrossWords generateCrossWord(List<ObjectId> categoryIds) {
 
         //String 이 아니라 Words 오브젝트를 리스트로 넘겨야함.
 //        List<Words> wordsList = new ArrayList<>();
@@ -119,16 +116,13 @@ public class WordPuzzle {
 
         System.out.println("\n");
 
-        //createPuzzle  에 정답 리스트, 판을 자르기 위한 왼쪽위, 오른쪽 아래 좌표를 반환해야함.
-        answersInfoRepository.saveAll(createdCrossWords.getAnswersInfo());
-        questionInfoRepository.save(createdCrossWords.getQuestionInfos());
-
-        crossWordsRepository.save(createdCrossWords);
+        //createPuzzle  에 정답 리스트, 판을 자르기 위한 왼쪽위, 오른쪽 아래 좌표를 반환해야함
+        return createdCrossWords;
     }
 
 
-    boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
-                    int direction) {
+    private boolean isValid(char[][] board, int overlapIndex, int overLapPosX, int overLapPosY, Words word,
+                            int direction) {
 
         int boardSize = BOARD_SIZE;
         int wordLength = word.getValue().length();
@@ -172,22 +166,22 @@ public class WordPuzzle {
         return true;
     }
 
-    boolean isWithinRange(int boardSize, int startX, int startY, int endX, int endY) {
+    private boolean isWithinRange(int boardSize, int startX, int startY, int endX, int endY) {
         if (startX < 0 || startY < 0 || endX >= boardSize || endY >= boardSize) {
             return false;
         }
         return true;
     }
 
-    boolean isCellEmpty(char[][] board, int x, int y) {
+    private boolean isCellEmpty(char[][] board, int x, int y) {
         return board[x][y] == 'ㅡ';
     }
 
-    boolean isCellBlocked(char[][] board, int x, int y) {
+    private boolean isCellBlocked(char[][] board, int x, int y) {
         return board[x][y] == 'X';
     }
 
-    boolean isCellOccupied(char[][] board, int x, int y) {
+    private boolean isCellOccupied(char[][] board, int x, int y) {
         if (x < 0 || y < 0 || x >= BOARD_SIZE || y >= BOARD_SIZE) {
             return false;
         }
@@ -195,8 +189,8 @@ public class WordPuzzle {
     }
 
 
-    List<WordInfo> findOverlaps(Words previousWord, int previousDirection, int startX, int startY,
-                                List<Words> unusedWords) {
+    private List<WordInfo> findOverlaps(Words previousWord, int previousDirection, int startX, int startY,
+                                        List<Words> unusedWords) {
         List<WordInfo> result = new ArrayList<>();
 
         for (int i = 0; i < previousWord.getValue().length(); i++) {
@@ -217,7 +211,7 @@ public class WordPuzzle {
         return result;
     }
 
-    CrossWords createPuzzle(List<Words> words, List<Category> categories) {
+    private CrossWords createPuzzle(List<Words> words, List<Category> categories) {
         char[][] board = new char[BOARD_SIZE][BOARD_SIZE];
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
@@ -286,8 +280,8 @@ public class WordPuzzle {
         return crossWords;
     }
 
-    PuzzleResult create(char[][] board, List<Words> usedWords, List<Words> unusedWords,
-                        List<WordInfo> connectionInfo, int minX, int minY) {
+    private PuzzleResult create(char[][] board, List<Words> usedWords, List<Words> unusedWords,
+                                List<WordInfo> connectionInfo, int minX, int minY) {
         List<WordInfo> newConnectionInfo = new ArrayList<>(connectionInfo);
         char[][] newBoard = board;
         List<AnswersInfoDAO> answersInfoList = new ArrayList<>();

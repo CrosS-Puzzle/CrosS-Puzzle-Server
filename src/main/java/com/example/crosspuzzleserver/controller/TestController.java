@@ -9,7 +9,8 @@ import com.example.crosspuzzleserver.repository.CrossWordsCustomQuery;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
 import com.example.crosspuzzleserver.repository.QuestionInfoRepository;
 import com.example.crosspuzzleserver.repository.WordsRepository;
-import com.example.crosspuzzleserver.service.WordPuzzle;
+import com.example.crosspuzzleserver.service.PuzzleGen.PuzzleGenService;
+import com.example.crosspuzzleserver.service.PuzzleGen.WordPuzzle;
 import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.exception.BadRequestException;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
@@ -41,6 +42,7 @@ public class TestController {
     private final QuestionInfoRepository questionInfoRepository;
     private final WordsRepository wordsRepository;
     private final CategoryRepository categoryRepository;
+    private final PuzzleGenService puzzleGenService;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -118,9 +120,12 @@ public class TestController {
         List<ObjectId> categories = new ArrayList<>();
         categories.add(categoryRepository.findAll().get(0).getId());
         System.out.println("@@@" + categories.get(0));
-        wordPuzzle.generateCrossWord(categories);
+//        wordPuzzle.generateCrossWord(categories);
 
-        return "success";
+        if (puzzleGenService.generatePuzzle()) {
+            return "success";
+        }
+        return "duplicated";
     }
 
 
