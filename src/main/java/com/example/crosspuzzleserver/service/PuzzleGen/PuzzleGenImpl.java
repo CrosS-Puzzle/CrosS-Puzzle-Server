@@ -29,7 +29,7 @@ public class PuzzleGenImpl implements PuzzleGenService {
     private final CrossWordsRepository crossWordsRepository;
 
     @Override
-    @Scheduled(cron = "0/10 * * * * *")
+    @Scheduled(cron = "0 0 3 * * *")
     public boolean generatePuzzle() {
 
         List<ObjectId> randomCategoryId = getRandomCategoryIds();
