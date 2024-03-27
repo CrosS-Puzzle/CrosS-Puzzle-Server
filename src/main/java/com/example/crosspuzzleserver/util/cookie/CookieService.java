@@ -14,8 +14,8 @@ public class CookieService {
         String uuid = UUID.randomUUID().toString();
         ResponseCookie responseCookie = ResponseCookie
                 .from("userCookie", uuid)
-//                .domain("api.cross-word.online")
-                .domain("localhost")
+                .domain("api.cross-word.online")
+//                .domain("localhost")
                 .path("/")
                 .httpOnly(true)
                 .secure(false)

@@ -49,13 +49,10 @@ public class PuzzleQueryController {
             @RequestParam(value = "answer", required = false, defaultValue = "false") String answer,
             @CookieValue(value = "userCookie", required = false) String cookieValue
     ) {
-        log.info("@@ input cookie " + cookieValue);
         if (cookieValue == null) {
             cookieValue = cookieService.getCookie();
         }
-        log.info("start request "+"@@" + cookieValue);
         if (!hits.isHit(cookieValue, id)) {
-            log.info("@@ is not hit");
             puzzleService.updatePuzzleHits(id);
         }
 
