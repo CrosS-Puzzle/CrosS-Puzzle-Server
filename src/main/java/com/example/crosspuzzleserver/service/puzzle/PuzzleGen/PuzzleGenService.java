@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service.PuzzleGen;
+package com.example.crosspuzzleserver.service.puzzle.PuzzleGen;
 
 
 public interface PuzzleGenService {

@@ -5,15 +5,19 @@ import com.example.crosspuzzleserver.service.dto.CheckWordsDto;
 import com.example.crosspuzzleserver.service.dto.IsAnswerDto;
 import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleDto;
 import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleListDto;
+import com.example.crosspuzzleserver.service.puzzle.spi.Hits;
 import com.example.crosspuzzleserver.service.spi.CategoryService;
-import com.example.crosspuzzleserver.service.spi.PuzzleService;
+import com.example.crosspuzzleserver.service.puzzle.spi.PuzzleService;
 import com.example.crosspuzzleserver.service.spi.WordsService;
+import com.example.crosspuzzleserver.util.cookie.CookieService;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +36,8 @@ public class PuzzleQueryController {
     private final PuzzleService puzzleService;
     private final WordsService wordsService;
     private final CategoryService categoryService;
+    private final CookieService cookieService;
+    private final Hits hits;
 
     private final static String DEFAULT_PAGE = "0";
     private final static String DEFAULT_LIMIT = "12";
@@ -40,10 +46,22 @@ public class PuzzleQueryController {
     @GetMapping("")
     public ResponseEntity<ApiResponse> getPuzzleById(
             @RequestParam(value = "id", required = true) String id,
-            @RequestParam(value = "answer", required = false, defaultValue = "false") String answer
+            @RequestParam(value = "answer", required = false, defaultValue = "false") String answer,
+            @CookieValue(value = "userCookie", required = false) String cookieValue
     ) {
+        log.info("@@ input cookie " + cookieValue);
+        if (cookieValue == null) {
+            cookieValue = cookieService.getCookie();
+        }
+        log.info("start request "+"@@" + cookieValue);
+        if (!hits.isHit(cookieValue, id)) {
+            log.info("@@ is not hit");
+            puzzleService.updatePuzzleHits(id);
+        }
+
         PuzzleDto puzzleDto = puzzleService.getPuzzleById(id, answer);
         return ResponseEntity.status(HttpStatus.OK)
+                .header(HttpHeaders.SET_COOKIE, cookieValue)
                 .body(ApiResponse.success(puzzleDto));
     }
 

@@ -38,6 +38,9 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     implementation('org.springframework.boot:spring-boot-starter-data-mongodb')
+
+    implementation 'redis.clients:jedis:4.3.1'
+
 }
 
 tasks.named('test') {

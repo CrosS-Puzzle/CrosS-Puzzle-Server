@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service;
+package com.example.crosspuzzleserver.service.puzzle;
 
 import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.Category;
@@ -13,7 +13,7 @@ import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleDto;
 import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleDtoWithoutWords;
 import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleListDto;
 import com.example.crosspuzzleserver.service.dto.puzzle.WordDto;
-import com.example.crosspuzzleserver.service.spi.PuzzleService;
+import com.example.crosspuzzleserver.service.puzzle.spi.PuzzleService;
 import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.exception.BadRequestException;
 import com.example.crosspuzzleserver.util.exception.NotFoundException;
@@ -40,10 +40,6 @@ public class PuzzleServiceImpl implements PuzzleService {
     @Transactional
     public PuzzleDto getPuzzleById(String puzzleId, String answer) {
         CrossWords crossWords = getCrossWordsById(puzzleId);
-
-        if (!Boolean.parseBoolean(answer)) {
-            updateViewCount(crossWords);
-        }
         return crossWordsToPuzzleDto(crossWords, Boolean.parseBoolean(answer));
     }
 
@@ -52,12 +48,6 @@ public class PuzzleServiceImpl implements PuzzleService {
                 .orElseThrow(() ->
                         new NotFoundException(Error.NOT_FOUND_PUZZLE.getMessage())
                 );
-    }
-
-    private void updateViewCount(CrossWords crossWords) {
-        QuestionInfos questionInfos = crossWords.getQuestionInfos();
-        questionInfos.addViewCount();
-        questionInfoRepository.save(questionInfos);
     }
 
     private PuzzleDto crossWordsToPuzzleDto(CrossWords crossWords, boolean includeValue) {
@@ -165,5 +155,17 @@ public class PuzzleServiceImpl implements PuzzleService {
             return Direction.DESC;
         }
         throw new BadRequestException(Error.ILLEGAL_SORT_REQUEST.getMessage());
+    }
+
+    @Override
+    public void updatePuzzleHits(String puzzleId) {
+        updateViewCount(puzzleId);
+    }
+
+    private void updateViewCount(String puzzleId) {
+        CrossWords crossWords = getCrossWordsById(puzzleId);
+        QuestionInfos questionInfos = crossWords.getQuestionInfos();
+        questionInfos.addViewCount();
+        questionInfoRepository.save(questionInfos);
     }
 }

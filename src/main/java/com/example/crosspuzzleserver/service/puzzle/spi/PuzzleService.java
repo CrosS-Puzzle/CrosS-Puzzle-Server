@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service.spi;
+package com.example.crosspuzzleserver.service.puzzle.spi;
 
 import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleDto;
 import com.example.crosspuzzleserver.service.dto.puzzle.PuzzleListDto;
@@ -11,5 +11,7 @@ public interface PuzzleService {
     PuzzleListDto getPuzzlesByCategoryIds(List<String> categoryIds, int page, int limit, String sort);
 
     boolean updatePuzzleSuccessCount(String puzzleId);
+
+    void updatePuzzleHits(String puzzleId);
 
 }

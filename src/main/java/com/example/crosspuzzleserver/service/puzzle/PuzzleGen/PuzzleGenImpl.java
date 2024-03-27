@@ -1,4 +1,4 @@
-package com.example.crosspuzzleserver.service.PuzzleGen;
+package com.example.crosspuzzleserver.service.puzzle.PuzzleGen;
 
 import com.example.crosspuzzleserver.domain.AnswersInfo;
 import com.example.crosspuzzleserver.domain.Category;

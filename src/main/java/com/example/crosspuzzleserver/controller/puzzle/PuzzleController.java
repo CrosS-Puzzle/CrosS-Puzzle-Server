@@ -1,7 +1,7 @@
 package com.example.crosspuzzleserver.controller.puzzle;
 
 
-import com.example.crosspuzzleserver.service.spi.PuzzleService;
+import com.example.crosspuzzleserver.service.puzzle.spi.PuzzleService;
 import com.example.crosspuzzleserver.util.error.Error;
 import com.example.crosspuzzleserver.util.response.ApiResponse;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package com.example.crosspuzzleserver.service;
 
 import com.example.crosspuzzleserver.repository.CrossWordsCustomQuery;
 import com.example.crosspuzzleserver.repository.CrossWordsRepository;
-import com.example.crosspuzzleserver.service.spi.PuzzleService;
+import com.example.crosspuzzleserver.service.puzzle.spi.PuzzleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;

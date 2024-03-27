@@ -1,0 +1,15 @@
+services:
+  app:
+    image: cross-puzzle
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      - redis
+
+  redis:
+    image: redis
+    ports: # 바인딩할 포트:내부 포트
+      - 8379:8379
